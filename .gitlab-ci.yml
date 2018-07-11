@@ -1,0 +1,25 @@
+services:
+  - name: docker:stable-dind
+
+image: docker.io/library/docker:stable
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2375
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+
+build:
+  stage: build
+  tags:
+    - dockerbuild
+  script:
+    - docker login --username gitlab-ci-token --password "$CI_JOB_TOKEN" "$CI_REGISTRY"
+    - |-
+      docker build \
+        --tag "$IMAGE_TAG" \
+        --build-arg "CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME" \
+        --build-arg "CI_COMMIT_SHA=$CI_COMMIT_SHA" \
+        .
+    - docker push "$IMAGE_TAG"
+
+# vim: set sw=2 sts=2 et :
