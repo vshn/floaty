@@ -30,6 +30,8 @@ func init() {
 
 const flagUsage = "<config-path> [group|instance] <vrrp-name> <vrrp-status> <priority>"
 
+var commitRefName, commitSHA string
+
 type notifyProgram struct {
 	config    notifyConfig
 	addresses []netAddress
@@ -182,8 +184,19 @@ func main() {
 	})
 
 	flag.Usage = func() {
+		version := "unknown"
+
+		if len(commitRefName) > 0 {
+			version = commitRefName
+		}
+
+		if len(commitSHA) > 0 {
+			version = fmt.Sprintf("%s (commit %s)", version, commitSHA[:10])
+		}
+
 		fmt.Fprintf(flag.CommandLine.Output(),
-			"Usage: %s %s\n\nOptions:\n", os.Args[0], flagUsage)
+			"Usage: %s %s\n\nVersion: %s\n\nOptions:\n",
+			os.Args[0], flagUsage, version)
 		flag.PrintDefaults()
 	}
 	flag.Parse()
