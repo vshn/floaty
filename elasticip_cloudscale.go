@@ -35,7 +35,7 @@ func (cfg cloudscaleNotifyConfig) NewProvider(globalConfig notifyConfig) (elasti
 	}
 
 	client := cloudscale.NewClient(httpClient)
-	client.UserAgent = httpUserAgent
+	client.UserAgent = newVersionInfo().HTTPUserAgent()
 	client.AuthToken = cfg.Token
 
 	if len(cfg.Endpoint) > 0 {

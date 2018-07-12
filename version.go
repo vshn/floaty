@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 // Set at build time
@@ -37,4 +38,16 @@ func (v versionInfo) HumanReadable() string {
 	}
 
 	return fmt.Sprintf("%s (commit %s)", v.VersionString, v.CommitID)
+}
+
+func (v versionInfo) HTTPUserAgent() string {
+	extra := []string{
+		v.VersionString,
+	}
+
+	if len(v.CommitID) > 0 {
+		extra = append(extra, "commit "+v.CommitID)
+	}
+
+	return fmt.Sprintf("Ursula by APPUiO.ch (%s)", strings.Join(extra, "; "))
 }
