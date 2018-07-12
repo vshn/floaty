@@ -12,8 +12,7 @@ import (
 // case of a failure retries are scheduled using the given back-off algorithm
 func loopWithRetries(ctx context.Context, logger logrus.FieldLogger,
 	delay time.Duration, retryBackOff backoff.BackOff,
-	fn func(context.Context) error) {
-
+	fn func(context.Context) error) error {
 	var pending bool
 
 	// Use existing code to introduce jitter for normal retries
@@ -25,7 +24,6 @@ func loopWithRetries(ctx context.Context, logger logrus.FieldLogger,
 	normalBackOff.MaxElapsedTime = 0
 	normalBackOff.Reset()
 
-loop:
 	for {
 		if err := fn(ctx); err == nil {
 			pending = false
@@ -42,6 +40,12 @@ loop:
 					retryBackOff.Reset()
 				}
 			}
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
 		}
 
 		timerDuration := normalBackOff.NextBackOff()
@@ -67,7 +71,7 @@ loop:
 		select {
 		case <-ctx.Done():
 			timer.Stop()
-			break loop
+			return ctx.Err()
 
 		case <-timer.C:
 		}
