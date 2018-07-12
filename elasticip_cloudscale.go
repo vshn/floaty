@@ -18,8 +18,8 @@ import (
 )
 
 type cloudscaleNotifyConfig struct {
-	Endpoint string `yaml:"endpoint"`
-	Token    string `yaml:"token"`
+	Endpoint *textURL `yaml:"endpoint"`
+	Token    string   `yaml:"token"`
 
 	ServerUUID           uuid.UUID            `yaml:"server-uuid"`
 	HostnameToServerUUID map[string]uuid.UUID `yaml:"hostname-to-server-uuid"`
@@ -38,12 +38,11 @@ func (cfg cloudscaleNotifyConfig) NewProvider(globalConfig notifyConfig) (elasti
 	client.UserAgent = newVersionInfo().HTTPUserAgent()
 	client.AuthToken = cfg.Token
 
-	if len(cfg.Endpoint) > 0 {
-		var err error
+	if cfg.Endpoint != nil {
+		// Make copy to prevent modifications
+		baseURL := url.URL(cfg.Endpoint.URL)
 
-		if client.BaseURL, err = url.Parse(cfg.Endpoint); err != nil {
-			return nil, err
-		}
+		client.BaseURL = &baseURL
 	}
 
 	nullUUID := uuid.UUID{}
