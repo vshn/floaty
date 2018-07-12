@@ -9,6 +9,14 @@ type netAddress struct {
 	net.IPNet
 }
 
+func (netaddr netAddress) String() string {
+	return netaddr.IPNet.String()
+}
+
+func (netaddr netAddress) MarshalText() ([]byte, error) {
+	return []byte(netaddr.String()), nil
+}
+
 func (netaddr *netAddress) UnmarshalText(text []byte) error {
 	raw := string(text)
 

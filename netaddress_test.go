@@ -52,3 +52,11 @@ func TestParseEmpty(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, err.Error(), `Parsing IP address "" failed`)
 }
+
+func TestMarshalAddress(t *testing.T) {
+	addr, err := parseNetAddress("2001:db8:ff::/64")
+	assert.NoError(t, err)
+
+	m, err := addr.MarshalText()
+	assert.Equal(t, m, []byte("2001:db8:ff::/64"))
+}
