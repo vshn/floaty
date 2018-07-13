@@ -120,14 +120,14 @@ func (p *cloudscaleFloatingIPProvider) Test(ctx context.Context) error {
 		fields["server"] = server
 	} else {
 		success = false
-		logrus.Error("Retrieving server %q: %s", p.serverUUID, errServer)
+		logrus.Errorf("Retrieving server %q: %s", p.serverUUID, errServer)
 	}
 
 	if errFloatingIP == nil {
 		fields["floating-ips"] = floatingIPs
 	} else {
 		success = false
-		logrus.Error("Listing floating IPs failed: %s", errFloatingIP)
+		logrus.Errorf("Listing floating IPs failed: %s", errFloatingIP)
 	}
 
 	logger := logrus.WithFields(fields)
