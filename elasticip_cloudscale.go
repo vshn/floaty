@@ -85,11 +85,8 @@ type cloudscaleFloatingIPProvider struct {
 	client     *cloudscale.Client
 }
 
-func (p *cloudscaleFloatingIPProvider) NewElasticIPRefresher(_ notifyConfig,
+func (p *cloudscaleFloatingIPProvider) NewElasticIPRefresher(logger *logrus.Entry,
 	network netAddress) (elasticIPRefresher, error) {
-
-	logger := logrus.WithField("address", network.String())
-
 	return &cloudscaleFloatingIPRefresher{
 		provider: p,
 		network:  network,

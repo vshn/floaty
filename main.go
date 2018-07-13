@@ -109,7 +109,9 @@ func (p notifyProgram) notifyMaster() {
 	refreshers := []elasticIPRefresher{}
 
 	for _, address := range p.addresses {
-		refresher, err := provider.NewElasticIPRefresher(p.config, address)
+		logger := logrus.WithField("address", address)
+
+		refresher, err := provider.NewElasticIPRefresher(logger, address)
 		if err != nil {
 			logrus.Fatal(err)
 		}

@@ -7,7 +7,7 @@ import (
 )
 
 type elasticIPProvider interface {
-	NewElasticIPRefresher(notifyConfig, netAddress) (elasticIPRefresher, error)
+	NewElasticIPRefresher(*logrus.Entry, netAddress) (elasticIPRefresher, error)
 }
 
 type elasticIPRefresher interface {
