@@ -45,7 +45,7 @@ RUN \
 # certificates to verify connections.
 FROM docker.io/library/alpine:latest
 
-RUN apk add --no-cache tini
+RUN apk add --no-cache tini ca-certificates
 
 COPY --from=ursula-builder --chown=0:0 /tmp/ursula /bin/ursula
 
