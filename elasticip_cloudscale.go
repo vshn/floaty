@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -22,6 +21,22 @@ type cloudscaleNotifyConfig struct {
 
 	ServerUUID           uuid.UUID            `yaml:"server-uuid"`
 	HostnameToServerUUID map[string]uuid.UUID `yaml:"hostname-to-server-uuid"`
+}
+
+func (cfg cloudscaleNotifyConfig) findServerUUID(hostname string) (uuid.UUID, error) {
+	nullUUID := uuid.UUID{}
+
+	if cfg.ServerUUID != nullUUID {
+		// Directly specified in config
+		return cfg.ServerUUID, nil
+	}
+
+	if serverUUID, ok := cfg.HostnameToServerUUID[hostname]; ok && serverUUID != nullUUID {
+		// Found using hostname
+		return serverUUID, nil
+	}
+
+	return nullUUID, fmt.Errorf("Server UUID not found with hostname %q", hostname)
 }
 
 func (cfg cloudscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
@@ -44,25 +59,16 @@ func (cfg cloudscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 		client.BaseURL = &baseURL
 	}
 
-	nullUUID := uuid.UUID{}
-	serverUUID := cfg.ServerUUID
-
-	if serverUUID == nullUUID {
-		hostname, err := os.Hostname()
-		if err != nil {
-			return nil, fmt.Errorf("Retrieving hostname: %s", err)
-		}
-
-		var ok bool
-
-		serverUUID, ok = cfg.HostnameToServerUUID[hostname]
-		if !ok {
-			return nil, fmt.Errorf("Server UUID not found for hostname %q", hostname)
-		}
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, fmt.Errorf("Retrieving hostname: %s", err)
 	}
 
-	if serverUUID == nullUUID {
-		return nil, errors.New("Server UUID is required")
+	logrus.Debugf("Hostname %q", hostname)
+
+	serverUUID, err := cfg.findServerUUID(hostname)
+	if err != nil {
+		return nil, err
 	}
 
 	switch serverUUID.Variant() {
