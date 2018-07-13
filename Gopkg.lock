@@ -26,12 +26,36 @@
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:ed32261137bbc0c6141af44cd205b0d11a27f6a6b533edd16d044bf654be109a"
+  name = "github.com/exoscale/egoscale"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "631ee6ea16ccb48a0c98054fdbf0f6e94d8f4a8c"
+  version = "v0.9.31"
+
+[[projects]]
+  digest = "1:833f0f38d9a3bfa080cbf197e93fb39b38684ac9fbc64c32077a3ee46ce5360c"
+  name = "github.com/exoscale/exoip"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f2fff8f04d7752af1948d3165a27e2d6a471769d"
+  version = "v0.3.13"
+
+[[projects]]
   digest = "1:8f8811f9be822914c3a25c6a071e93beb4c805d7b026cbf298bc577bc1cc945b"
   name = "github.com/google/uuid"
   packages = ["."]
   pruneopts = "UT"
   revision = "064e2069ce9c359c118179501254f67d7d37ba24"
   version = "0.2"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5c3444689562053b027ef3b96372e306adbe0d7d109b6cdd48d01eb80f8bab14"
+  name = "github.com/jinzhu/copier"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7e38e58719c33e0d44d585c4ab477a30f8cb82dd"
 
 [[projects]]
   branch = "master"
@@ -66,6 +90,25 @@
   version = "v1.2.2"
 
 [[projects]]
+  digest = "1:0f16493c4037d88fe4b389197728a518e4e2d300dafac026ad2918bd86e5d619"
+  name = "github.com/vishvananda/netlink"
+  packages = [
+    ".",
+    "nl",
+  ]
+  pruneopts = "UT"
+  revision = "a2ad57a690f3caf3015351d2d6e1c0b95c349752"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:02b1d1b48bf853ea2a9bea029ffe54e3fd7804903a0eda9a78191db8984300d2"
+  name = "github.com/vishvananda/netns"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "be1fbeda19366dea804f00efff2dd73a1642fdcc"
+
+[[projects]]
   branch = "master"
   digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
   name = "golang.org/x/crypto"
@@ -79,7 +122,7 @@
   name = "golang.org/x/net"
   packages = ["context"]
   pruneopts = "UT"
-  revision = "039a4258aec0ad3c79b905677cceeab13b296a77"
+  revision = "d0887baf81f4598189d4e12a37c6da86f0bba4d0"
 
 [[projects]]
   branch = "master"
@@ -106,6 +149,8 @@
   input-imports = [
     "github.com/cenkalti/backoff",
     "github.com/cloudscale-ch/cloudscale-go-sdk",
+    "github.com/exoscale/egoscale",
+    "github.com/exoscale/exoip",
     "github.com/google/uuid",
     "github.com/nightlyone/lockfile",
     "github.com/sirupsen/logrus",

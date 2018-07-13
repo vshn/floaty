@@ -74,6 +74,15 @@ Configuration data must be supplied as a YAML file. The top level is a map.
   * `hostname-to-server-uuid`: Map with hostname as key and next-hop server
     UUID as value. Hostname as reported by kernel is used for lookup.
 
+* `exoscale`: Exoscale-specific settings as a map.
+
+  * `endpoint`: URL for API endpoint. Defaults to production URL.
+  * `key`: API access key (starts with `EXO`).
+  * `secret`: API access secret.
+  * `instance-id`: Virtual machine ID as string; if not given a metadata
+    service is used to automatically retrieve the ID of the machine running the
+    program.
+
 
 ## Example configuration
 
@@ -94,6 +103,10 @@ cloudscale:
     lb1.example.net: 96defb88-002c-4985-b795-5c929bab23da
     lb2.example.net: 7d37a073-e84c-4fc6-b631-cc2e29d9d4ea
     lb3.example.net: e1dfe126-bc14-494e-998f-d221b02941b4
+
+exoscale:
+  key: EXOLICIOUS
+  secret: NomNomNom
 ```
 
 
@@ -135,3 +148,5 @@ exec /bin/ursula --json-log /etc/ursula.yml "$@" \
   used for adding jitter to retries
 
 * [Thundering herd problem](https://en.wikipedia.org/wiki/Thundering_herd_problem)
+
+<!-- vim: set sw=2 sts=2 et : -->

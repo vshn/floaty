@@ -64,6 +64,9 @@ func (c notifyConfig) NewProvider() (elasticIPProvider, error) {
 
 	case "cloudscale":
 		return c.Cloudscale.NewProvider()
+
+	case "exoscale":
+		return c.Exoscale.NewProvider()
 	}
 
 	return nil, fmt.Errorf("Provider %q not supported", c.Provider)
