@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -89,6 +91,55 @@ type cloudscaleFloatingIPProvider struct {
 	serverUUID string
 	httpClient *http.Client
 	client     *cloudscale.Client
+}
+
+func (p *cloudscaleFloatingIPProvider) Test(ctx context.Context) error {
+	var errServer, errFloatingIP error
+	var server *cloudscale.Server
+	var floatingIPs []cloudscale.FloatingIP
+
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		server, errServer = p.client.Servers.Get(ctx, p.serverUUID)
+	}()
+
+	go func() {
+		defer wg.Done()
+		floatingIPs, errFloatingIP = p.client.FloatingIPs.List(ctx)
+	}()
+
+	wg.Wait()
+
+	fields := logrus.Fields{}
+	success := true
+
+	if errServer == nil {
+		fields["server"] = server
+	} else {
+		success = false
+		logrus.Error("Retrieving server %q: %s", p.serverUUID, errServer)
+	}
+
+	if errFloatingIP == nil {
+		fields["floating-ips"] = floatingIPs
+	} else {
+		success = false
+		logrus.Error("Listing floating IPs failed: %s", errFloatingIP)
+	}
+
+	logger := logrus.WithFields(fields)
+
+	if success {
+		logger.Debug("Test successful")
+		return nil
+	}
+
+	logger.Error("Test failed")
+
+	return errors.New("Self-test failed")
 }
 
 func (p *cloudscaleFloatingIPProvider) NewElasticIPRefresher(logger *logrus.Entry,

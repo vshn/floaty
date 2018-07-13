@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -18,17 +19,22 @@ import (
 
 var verboseOutput bool
 var jsonLog bool
+var testMode bool
 
 func init() {
-	const defaultVerbose = false
-
-	flag.BoolVar(&verboseOutput, "v", defaultVerbose, "")
-	flag.BoolVar(&verboseOutput, "verbose", defaultVerbose, "Verbose logging")
+	for _, i := range []string{"v", "verbose"} {
+		flag.BoolVar(&verboseOutput, i, false, "Verbose logging")
+	}
 
 	flag.BoolVar(&jsonLog, "json-log", false, "Log output in JSON format")
+
+	for _, i := range []string{"T", "test"} {
+		flag.BoolVar(&testMode, i, false,
+			"Test mode; verify configuration and API access")
+	}
 }
 
-const flagUsage = "<config-path> [group|instance] <vrrp-name> <vrrp-status> <priority>"
+const flagUsage = "{ -T <config-path> | <config-path> [group|instance] <vrrp-name> <vrrp-status> <priority> }"
 
 type notifyProgram struct {
 	config    notifyConfig
@@ -174,6 +180,38 @@ func readAddressesFromKeepalivedConfig(path, vrrpInstanceName string) ([]netAddr
 	return vrrpInstance.Addresses, nil
 }
 
+func loadConfig(path string) (notifyConfig, error) {
+	cfg := newNotifyConfig()
+
+	if err := cfg.ReadFromYAML(path); err != nil {
+		return cfg, err
+	}
+
+	logrus.WithField("config", cfg).Debugf("Configuration")
+
+	return cfg, nil
+}
+
+func providerTest(path string) error {
+	logrus.Info("Running self-test")
+
+	cfg, err := loadConfig(path)
+	if err != nil {
+		return err
+	}
+
+	provider, err := cfg.NewProvider()
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+
+	defer cancel()
+
+	return provider.Test(ctx)
+}
+
 func main() {
 	var err error
 
@@ -193,11 +231,6 @@ func main() {
 	}
 	flag.Parse()
 
-	if flag.NArg() != 5 {
-		flag.Usage()
-		os.Exit(2)
-	}
-
 	if !useVerboseLogging() {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
@@ -206,7 +239,22 @@ func main() {
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 	}
 
+	switch {
+	case testMode && flag.NArg() == 1:
+	case flag.NArg() == 5:
+	default:
+		flag.Usage()
+		os.Exit(2)
+	}
+
 	configFile := flag.Arg(0)
+
+	if testMode {
+		if err := providerTest(configFile); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 
 	if strings.ToLower(flag.Arg(1)) != "instance" {
 		// TODO: Implement group notifications
@@ -222,15 +270,11 @@ func main() {
 		"status":        vrrpStatus,
 	}).Info("Hello world")
 
-	p := notifyProgram{
-		config: newNotifyConfig(),
-	}
+	p := notifyProgram{}
 
-	if err = p.config.ReadFromYAML(configFile); err != nil {
-		logrus.Fatal(err)
+	if p.config, err = loadConfig(configFile); err != nil {
+		log.Fatal(err)
 	}
-
-	logrus.WithField("config", p.config).Debugf("Configuration")
 
 	p.addresses, err =
 		readAddressesFromKeepalivedConfig(p.config.KeepalivedConfigFile, vrrpInstanceName)

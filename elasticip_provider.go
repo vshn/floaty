@@ -7,6 +7,7 @@ import (
 )
 
 type elasticIPProvider interface {
+	Test(context.Context) error
 	NewElasticIPRefresher(*logrus.Entry, netAddress) (elasticIPRefresher, error)
 }
 

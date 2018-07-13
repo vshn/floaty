@@ -105,14 +105,30 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 	}
 
 	return &exoscaleElasticIPProvider{
-		client: client,
-		nicID:  nic.ID,
+		client:     client,
+		instanceID: instanceID,
+		nicID:      nic.ID,
 	}, nil
 }
 
 type exoscaleElasticIPProvider struct {
-	client *egoscale.Client
-	nicID  string
+	client     *egoscale.Client
+	instanceID string
+	nicID      string
+}
+
+func (p *exoscaleElasticIPProvider) Test(ctx context.Context) error {
+	nic, err := p.client.ListWithContext(ctx, &egoscale.Nic{
+		VirtualMachineID: p.instanceID,
+		ID:               p.nicID,
+	})
+	if err != nil {
+		return fmt.Errorf("Retrieving NIC %q: %s", p.nicID, err)
+	}
+
+	logrus.WithField("nic", nic).Debug("Test successful")
+
+	return nil
 }
 
 func (p *exoscaleElasticIPProvider) NewElasticIPRefresher(logger *logrus.Entry,

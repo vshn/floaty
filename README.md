@@ -138,6 +138,15 @@ exec /bin/ursula --json-log /etc/ursula.yml "$@" \
   >>/proc/1/fd/1 2>>/proc/1/fd/2
 ```
 
+### Test mode
+
+Ursula implements provider-specific self-tests which can be run outside of
+Keepalived.
+
+```
+/bin/ursula --json-log --verbose --test /etc/ursula.yml
+```
+
 
 ## External links
 
