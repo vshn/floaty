@@ -63,7 +63,7 @@ func (c notifyConfig) NewProvider() (elasticIPProvider, error) {
 		return nil, errors.New("Missing provider")
 
 	case "cloudscale":
-		return c.Cloudscale.NewProvider(c)
+		return c.Cloudscale.NewProvider()
 	}
 
 	return nil, fmt.Errorf("Provider %q not supported", c.Provider)

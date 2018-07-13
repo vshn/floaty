@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
 	"net/http"
 	"net/url"
 	"os"
@@ -25,13 +24,13 @@ type cloudscaleNotifyConfig struct {
 	HostnameToServerUUID map[string]uuid.UUID `yaml:"hostname-to-server-uuid"`
 }
 
-func (cfg cloudscaleNotifyConfig) NewProvider(globalConfig notifyConfig) (elasticIPProvider, error) {
+func (cfg cloudscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 	if len(cfg.Token) < 1 {
 		return nil, fmt.Errorf("Authentication token required")
 	}
 
 	httpClient := &http.Client{
-		Timeout: globalConfig.RefreshTimeout,
+		Timeout: 1 * time.Minute,
 	}
 
 	client := cloudscale.NewClient(httpClient)
@@ -116,26 +115,15 @@ func (r *cloudscaleFloatingIPRefresher) Logger() *logrus.Entry {
 func (r *cloudscaleFloatingIPRefresher) Refresh(ctx context.Context) error {
 	serverUUID := r.provider.serverUUID
 	ip := r.network.IP.String()
-
 	client := r.provider.client
-	httpClient := r.provider.httpClient
-	timeout := httpClient.Timeout
 
 	r.logger.Infof("Set next-hop of address %s to server %s", ip, serverUUID)
-
-	extraTime :=
-		time.Duration(math.Min(10, math.Max(2, timeout.Seconds()/10.0))) * time.Second
-
-	// Give slightly more time than for underlying HTTP timeout
-	ctxRequest, ctxCancel := context.WithTimeout(ctx, timeout+extraTime)
-
-	defer ctxCancel()
 
 	req := &cloudscale.FloatingIPUpdateRequest{
 		Server: serverUUID,
 	}
 
-	response, err := client.FloatingIPs.Update(ctxRequest, ip, req)
+	response, err := client.FloatingIPs.Update(ctx, ip, req)
 
 	if err == nil {
 		r.logger.WithField("response", response).Debug("Refresh successful")

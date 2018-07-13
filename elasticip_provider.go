@@ -21,7 +21,14 @@ func runRefresher(ctx context.Context, cfg notifyConfig, r elasticIPRefresher) {
 	logger := r.Logger()
 	logger.Infof("Refreshing %q every %s on average", r, interval)
 
-	err := loopWithRetries(ctx, logger, interval, cfg.BackOff.New(), r.Refresh)
+	err := loopWithRetries(ctx, logger, interval, cfg.BackOff.New(),
+		func(ctx context.Context) error {
+			ctxRefresh, cancel := context.WithTimeout(ctx, cfg.RefreshTimeout)
+
+			defer cancel()
+
+			return r.Refresh(ctxRefresh)
+		})
 
 	logger.Debugf("Shutdown (%s)", err)
 }
