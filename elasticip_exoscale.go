@@ -126,7 +126,7 @@ func (p *exoscaleElasticIPProvider) Test(ctx context.Context) error {
 		return fmt.Errorf("Retrieving NIC %q: %s", p.nicID, err)
 	}
 
-	logrus.WithField("nic", nic).Debug("Test successful")
+	logrus.WithField("nic", nic).Info("Test successful")
 
 	return nil
 }

@@ -133,7 +133,7 @@ func (p *cloudscaleFloatingIPProvider) Test(ctx context.Context) error {
 	logger := logrus.WithFields(fields)
 
 	if success {
-		logger.Debug("Test successful")
+		logger.Info("Test successful")
 		return nil
 	}
 
