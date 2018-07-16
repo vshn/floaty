@@ -249,6 +249,10 @@ func main() {
 
 	configFile := flag.Arg(0)
 
+	if err = configOutOfMemoryKiller(); err != nil {
+		log.Fatal(err)
+	}
+
 	if testMode {
 		if err := providerTest(configFile); err != nil {
 			log.Fatal(err)
