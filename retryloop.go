@@ -13,11 +13,16 @@ import (
 func loopWithRetries(ctx context.Context, logger logrus.FieldLogger,
 	delay time.Duration, retryBackOff backoff.BackOff,
 	fn func(context.Context) error) error {
+	const maxInitialInterval = 10 * time.Second
 	var pending bool
 
 	// Use existing code to introduce jitter for normal retries
 	normalBackOff := backoff.NewExponentialBackOff()
 	normalBackOff.InitialInterval = delay
+	if normalBackOff.InitialInterval > maxInitialInterval {
+		// Run more often when starting calls at normal interval
+		normalBackOff.InitialInterval = maxInitialInterval
+	}
 	normalBackOff.RandomizationFactor = 0.1
 	normalBackOff.MaxInterval = delay
 	normalBackOff.Multiplier = 1
