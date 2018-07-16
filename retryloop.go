@@ -25,7 +25,7 @@ func loopWithRetries(ctx context.Context, logger logrus.FieldLogger,
 	}
 	normalBackOff.RandomizationFactor = 0.1
 	normalBackOff.MaxInterval = delay
-	normalBackOff.Multiplier = 1
+	normalBackOff.Multiplier = 1.1
 	normalBackOff.MaxElapsedTime = 0
 	normalBackOff.Reset()
 
