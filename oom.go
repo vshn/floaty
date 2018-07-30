@@ -32,7 +32,7 @@ func configOutOfMemoryKiller() error {
 
 	bo := backoff.NewExponentialBackOff()
 	bo.InitialInterval = 10 * time.Millisecond
-	bo.MaxInterval = 100 * time.Second
+	bo.MaxInterval = 100 * time.Millisecond
 	bo.MaxElapsedTime = 1 * time.Second
 	bo.Reset()
 
