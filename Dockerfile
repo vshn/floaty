@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.10 AS ursula-builder
+FROM docker.io/library/golang:1.11 AS ursula-builder
 
 ARG DEP_VERSION=0.4.1
 
@@ -28,12 +28,8 @@ RUN \
   packages=$(go list ./...) || exit 1; \
   echo packages; \
   echo "$packages" | xargs; \
-  status=0 && \
-  echo vet; \
-  echo "$packages" | xargs --no-run-if-empty go vet || status=1; \
   echo test; \
-  echo "$packages" | CGO_ENABLED=1 xargs --no-run-if-empty go test -race || status=1; \
-  exit "$status"
+  echo "$packages" | CGO_ENABLED=1 xargs --no-run-if-empty go test -race
 RUN \
   set -e; \
   ldflags='-extldflags "-static"' && \
