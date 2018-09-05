@@ -1,6 +1,6 @@
 FROM docker.io/library/golang:1.11 AS ursula-builder
 
-ARG DEP_VERSION=0.4.1
+ARG DEP_VERSION=0.5.0
 
 RUN \
   curl --location --output "$GOPATH/bin/dep" \
