@@ -33,6 +33,7 @@ RUN \
 RUN \
   set -e; \
   ldflags='-extldflags "-static"' && \
+  ldflags="${ldflags} -s -w" && \
   ldflags="${ldflags} -X 'main.commitRefName=${CI_COMMIT_REF_NAME}'" && \
   ldflags="${ldflags} -X 'main.commitSHA=${CI_COMMIT_SHA}'" && \
   exec go build -v -tags netgo -ldflags "$ldflags" -o /tmp/ursula .
