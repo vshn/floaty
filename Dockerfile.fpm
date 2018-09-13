@@ -1,0 +1,12 @@
+FROM docker.io/library/ruby:2-stretch
+
+RUN \
+  apt-get update && \
+  apt-get install -y rpm fakeroot && \
+  gem install --no-ri --no-rdoc fpm && \
+  fpm --version
+
+ENTRYPOINT ["/usr/local/bin/fpm"]
+CMD []
+
+# vim: set sw=2 sts=2 et ft=dockerfile :
