@@ -38,6 +38,15 @@ func (cfg cloudscaleNotifyConfig) findServerUUID(hostname string) (uuid.UUID, er
 		return serverUUID, nil
 	}
 
+	md, err := findCloudscaleServerMetadata()
+	if err != nil {
+		return nullUUID, fmt.Errorf("Failed to retrieve Cloudscale server metadata: %s", err)
+	}
+
+	if md.Meta.CloudscaleUUID != nil {
+		return *md.Meta.CloudscaleUUID, nil
+	}
+
 	return nullUUID, fmt.Errorf("Server UUID not found with hostname %q", hostname)
 }
 
@@ -79,6 +88,8 @@ func (cfg cloudscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 	default:
 		return nil, fmt.Errorf("Invalid UUID %q", serverUUID)
 	}
+
+	logrus.WithField("server-uuid", serverUUID).Debug("Server UUID")
 
 	return &cloudscaleFloatingIPProvider{
 		serverUUID: serverUUID.String(),
