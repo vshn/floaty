@@ -65,11 +65,9 @@ Configuration data must be supplied as a YAML file. The top level is a map.
 * `provider`: Cloud API provider, must be either `cloudscale` or `exoscale`.
   Provider-specific settings are in separate keys.
 
-* `cloudscale`: Cloudscale.ch-specific settings as a map.
-
-  When neither `server-uuid` nor `hostname-to-server-uuid` is specified
-  a metadata service is used to automatically discover the instance UUID of
-  a server.
+* `cloudscale`: Cloudscale.ch-specific settings as a map. When neither
+  `server-uuid` nor `hostname-to-server-uuid` is specified a metadata service
+  is used to automatically discover the instance UUID of a server.
 
   * `endpoint`: URL for API endpoint. Defaults to production URL.
   * `token`: API authentication token as a string. Must have write access.
