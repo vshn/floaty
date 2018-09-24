@@ -2,8 +2,8 @@
 variables: &global_variables
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375
-  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-  FPM_IMAGE_TAG: $CI_REGISTRY_IMAGE:${CI_COMMIT_REF_SLUG}-fpm
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  FPM_IMAGE_TAG: $CI_REGISTRY_IMAGE:${CI_COMMIT_REF_NAME}-fpm
   PACKAGE_NAME: ursula
   PACKAGE_URL: https://git.vshn.net/appuio-public/ursula/
   PACKAGE_DESC: Cloud provider API integration for Keepalived
