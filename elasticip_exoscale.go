@@ -38,13 +38,7 @@ func findExoscaleInstanceID() (string, error) {
 		return err
 	}
 
-	bo := backoff.NewExponentialBackOff()
-	bo.InitialInterval = 100 * time.Millisecond
-	bo.MaxInterval = 1 * time.Second
-	bo.MaxElapsedTime = 5 * time.Second
-	bo.Reset()
-
-	if err := backoff.Retry(fn, bo); err != nil {
+	if err := metadataRetry(fn); err != nil {
 		return "", err
 	}
 

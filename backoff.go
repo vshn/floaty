@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
+	"github.com/sirupsen/logrus"
 )
 
 type backOffConfig struct {
@@ -30,4 +31,22 @@ func (cfg *backOffConfig) New() backoff.BackOff {
 	b.MaxElapsedTime = cfg.MaxElapsedTime
 	b.Reset()
 	return b
+}
+
+// metadataRetry is a utility function retry metadata-receiving functions
+func metadataRetry(operation backoff.Operation) error {
+	bo := backoff.NewExponentialBackOff()
+	bo.InitialInterval = 100 * time.Millisecond
+	bo.MaxInterval = 1 * time.Second
+	bo.MaxElapsedTime = 10 * time.Second
+	bo.Reset()
+
+	return backoff.Retry(func() error {
+		if err := operation(); err != nil {
+			logrus.Debug(err)
+			return err
+		}
+
+		return nil
+	}, bo)
 }
