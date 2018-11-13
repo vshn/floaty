@@ -26,6 +26,8 @@ type notifyConfig struct {
 
 	KeepalivedConfigFile string `yaml:"keepalived-config"`
 
+	ManagedAddresses []netAddress `yaml:"managed-addresses"`
+
 	RefreshInterval time.Duration `yaml:"refresh-interval"`
 	RefreshTimeout  time.Duration `yaml:"refresh-timeout"`
 
