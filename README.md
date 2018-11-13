@@ -8,9 +8,10 @@ ensures that split-brain situations or external modifications to the
 destination have little impact.
 
 For VRRP instances in `MASTER` status Ursula reads the Keepalived
-configuration, extracts the IP addresses assigned to a given VRRP instance, and
-proceeds to refresh those via a provider-specific API in a regular interval.
-Failures are handled gracefully.
+configuration. When no addresses are configured in the Ursula configuration
+the IP addresses assigned to the given VRRP instance are managed.
+Managing an IP address means to refresh its target host via a provider-specific
+API in a regular interval. Failures are handled gracefully.
 
 For instances in `BACKUP` and `FAULT` status any existing instance for
 a previous `MASTER` status is terminated by sending a signal and waiting for
@@ -39,8 +40,12 @@ Configuration data must be supplied as a YAML file. The top level is a map.
   seconds.
 
 * `keepalived-config`: Path to Keepalived configuration. Defaults to
-  `/etc/keepalived/keepalived.conf`. The configuration is parsed to extract
-  the IP addresses assigned with a VRRP instance.
+  `/etc/keepalived/keepalived.conf`. The configuration is parsed to verify
+  the existence of the VRRP instance name given on the command line. If
+  `managed-addresses` is not used the IP addresses assigned to the VRRP
+  instance are used.
+
+* `managed-addresses`: Array with IP addresses to manage.
 
 * `refresh-interval`: How long to wait between refreshes of individual
   addresses as a duration. Defaults to 1 minute. Minimal jitter is
@@ -109,6 +114,12 @@ cloudscale:
 exoscale:
   key: EXOLICIOUS
   secret: NomNomNom
+
+# See description: use only if Keepalived configuration doesn't contain
+# addresses
+managed-addresses:
+  - 192.0.2.1/24
+  - 192.0.2.2/24
 ```
 
 

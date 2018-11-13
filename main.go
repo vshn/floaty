@@ -286,6 +286,10 @@ func main() {
 		logrus.Fatal(err)
 	}
 
+	if len(p.config.ManagedAddresses) > 0 {
+		p.addresses = p.config.ManagedAddresses
+	}
+
 	logrus.WithField("addresses", p.addresses).Infof("IP addresses")
 
 	{
