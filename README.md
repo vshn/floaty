@@ -91,6 +91,18 @@ Configuration data must be supplied as a YAML file. The top level is a map.
     program.
 
 
+### Hostnames
+
+Hostnames used in the configuration must match the kernel's hostname as
+returned by Go's [`os.Hostname` function](https://golang.org/pkg/os/#Hostname).
+Depending on the system the name may or may not be a fully qualified domain
+name (FQDN).
+
+On Linux systems the `hostname` command without parameters will return the
+configured name which is also retrievable from the `/proc/sys/kernel/hostname`
+pseudo file.
+
+
 ## Example configuration
 
 The configuration shown is for demonstration, not a recommendation.
@@ -150,6 +162,7 @@ PID 1.
 exec /bin/ursula --json-log /etc/ursula.yml "$@" \
   >>/proc/1/fd/1 2>>/proc/1/fd/2
 ```
+
 
 ### Test mode
 
