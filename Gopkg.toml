@@ -10,8 +10,8 @@
   name = "github.com/cloudscale-ch/cloudscale-go-sdk"
 
 [[constraint]]
-  name = "github.com/google/uuid"
-  version = "0.2.0"
+  name = "github.com/satori/go.uuid"
+  version = "1.2.0"
 
 [[constraint]]
   branch = "master"

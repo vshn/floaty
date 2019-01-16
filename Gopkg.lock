@@ -42,14 +42,6 @@
   version = "v0.3.13"
 
 [[projects]]
-  digest = "1:8f8811f9be822914c3a25c6a071e93beb4c805d7b026cbf298bc577bc1cc945b"
-  name = "github.com/google/uuid"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "064e2069ce9c359c118179501254f67d7d37ba24"
-  version = "0.2"
-
-[[projects]]
   branch = "master"
   digest = "1:5c3444689562053b027ef3b96372e306adbe0d7d109b6cdd48d01eb80f8bab14"
   name = "github.com/jinzhu/copier"
@@ -72,6 +64,14 @@
   pruneopts = "UT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:d867dfa6751c8d7a435821ad3b736310c2ed68945d05b50fb9d23aee0540c8cc"
@@ -151,8 +151,8 @@
     "github.com/cloudscale-ch/cloudscale-go-sdk",
     "github.com/exoscale/egoscale",
     "github.com/exoscale/exoip",
-    "github.com/google/uuid",
     "github.com/nightlyone/lockfile",
+    "github.com/satori/go.uuid",
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "gopkg.in/yaml.v2",
