@@ -2,20 +2,20 @@
 
 
 [[projects]]
-  digest = "1:2209584c0f7c9b68c23374e659357ab546e1b70eec2761f03280f69a8fd23d77"
+  digest = "1:166438587ed45ac211dab8a3ecebf4fa0c186d0db63430fb9127bbc2e5fcdc67"
   name = "github.com/cenkalti/backoff"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2ea60e5f094469f9e65adb9cd103795b73ae743e"
-  version = "v2.0.0"
+  revision = "1e4cf3da559842a91afcb6ea6141451e6c30c618"
+  version = "v2.1.1"
 
 [[projects]]
   branch = "master"
-  digest = "1:64ac263d1cabd67f31fb629cce7460645f6f51fac8afbfa534d82ef6bb5735df"
+  digest = "1:023cea25b4b7df51b518d521495da46118c6289d3ed8ee875f518955fb8ade24"
   name = "github.com/cloudscale-ch/cloudscale-go-sdk"
   packages = ["."]
   pruneopts = "UT"
-  revision = "43ba2f74931ae1c59a14a6e942cf7fca5d48b64e"
+  revision = "17fbddda00c87b73c5ceb601aeaced294748231b"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -26,28 +26,28 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:ed32261137bbc0c6141af44cd205b0d11a27f6a6b533edd16d044bf654be109a"
+  digest = "1:03ca4baaa08ee80f7e89ad64e2ef7d9b322cc81e59ced153621538d712397ec5"
   name = "github.com/exoscale/egoscale"
   packages = ["."]
   pruneopts = "UT"
-  revision = "631ee6ea16ccb48a0c98054fdbf0f6e94d8f4a8c"
-  version = "v0.9.31"
-
-[[projects]]
-  digest = "1:833f0f38d9a3bfa080cbf197e93fb39b38684ac9fbc64c32077a3ee46ce5360c"
-  name = "github.com/exoscale/exoip"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f2fff8f04d7752af1948d3165a27e2d6a471769d"
-  version = "v0.3.13"
+  revision = "ada2a6b6341fc08195d64e083e0869baa2e42f43"
+  version = "v0.13.2"
 
 [[projects]]
   branch = "master"
-  digest = "1:5c3444689562053b027ef3b96372e306adbe0d7d109b6cdd48d01eb80f8bab14"
-  name = "github.com/jinzhu/copier"
+  digest = "1:3d4d946ebf7f3fc65fed7e3c307c06f91a54aed31b0a97de764129f4d6befc8c"
+  name = "github.com/exoscale/exoip"
   packages = ["."]
   pruneopts = "UT"
-  revision = "7e38e58719c33e0d44d585c4ab477a30f8cb82dd"
+  revision = "0be5036221ce99486ceceb8ced427fcf4500c399"
+
+[[projects]]
+  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
@@ -74,20 +74,20 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:d867dfa6751c8d7a435821ad3b736310c2ed68945d05b50fb9d23aee0540c8cc"
+  digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
-  version = "v1.0.6"
+  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
+  version = "v1.3.0"
 
 [[projects]]
-  digest = "1:18752d0b95816a1b777505a97f71c7467a8445b8ffb55631a7bf779f6ba4fa83"
+  digest = "1:972c2427413d41a1e06ca4897e8528e5a1622894050e2f527b38ddf0f343f759"
   name = "github.com/stretchr/testify"
   packages = ["assert"]
   pruneopts = "UT"
-  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
-  version = "v1.2.2"
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:2d9d06cb9d46dacfdbb45f8575b39fc0126d083841a29d4fbf8d97708f43107e"
@@ -110,38 +110,30 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
+  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
+  revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
 
 [[projects]]
   branch = "master"
-  digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
-  name = "golang.org/x/net"
-  packages = ["context"]
-  pruneopts = "UT"
-  revision = "26e67e76b6c3f6ce91f7c52def5af501b4e0f3a2"
-
-[[projects]]
-  branch = "master"
-  digest = "1:e10551220bea6da5274318545537df1012268056be6484b83a3338328050cde0"
+  digest = "1:0150ad9329793acacd98bcbd88492d9e4731824b5d3fbc73a8a1b45eb21acf6b"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "ee1b12c67af419cf5a9be3bdbeea7fc1c5f32f11"
+  revision = "a457fd036447854c0c02e89ea439481bdcf941a2"
 
 [[projects]]
-  digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
+  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
 
 [solve-meta]
   analyzer-name = "dep"

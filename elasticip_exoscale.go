@@ -11,6 +11,7 @@ import (
 	"github.com/cenkalti/backoff"
 	"github.com/exoscale/egoscale"
 	"github.com/exoscale/exoip"
+	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -18,8 +19,8 @@ const (
 	defaultExoscaleEndpoint = "https://api.exoscale.ch/compute"
 )
 
-func findExoscaleInstanceID() (string, error) {
-	var instanceID string
+func findExoscaleInstanceID() (uuid.UUID, error) {
+	var instanceID uuid.UUID
 
 	fn := func() error {
 		mserver, err := exoip.FindMetadataServer()
@@ -29,27 +30,29 @@ func findExoscaleInstanceID() (string, error) {
 
 		logrus.Debugf("Metadata server %q", mserver)
 
-		instanceID, err = exoip.FetchMetadata(mserver, "/latest/instance-id")
+		rawInstanceID, err := exoip.FetchMetadata(mserver, "/latest/instance-id")
 
-		if err == nil && len(instanceID) < 1 {
+		if err == nil && len(rawInstanceID) < 1 {
 			return errors.New("Received empty instance ID")
 		}
+
+		instanceID, err = uuid.FromString(rawInstanceID)
 
 		return err
 	}
 
 	if err := metadataRetry(fn); err != nil {
-		return "", err
+		return uuid.Nil, err
 	}
 
 	return instanceID, nil
 }
 
 type exoscaleNotifyConfig struct {
-	Endpoint   *textURL `yaml:"endpoint"`
-	Key        string   `yaml:"key"`
-	Secret     string   `yaml:"secret"`
-	InstanceID string   `yaml:"instance-id"`
+	Endpoint   *textURL  `yaml:"endpoint"`
+	Key        string    `yaml:"key"`
+	Secret     string    `yaml:"secret"`
+	InstanceID uuid.UUID `yaml:"instance-id"`
 }
 
 func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
@@ -75,7 +78,7 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 
 	instanceID := c.InstanceID
 
-	if len(c.InstanceID) == 0 {
+	if uuid.Equal(c.InstanceID, uuid.Nil) {
 		if instanceID, err = findExoscaleInstanceID(); err != nil {
 			return nil, fmt.Errorf("Instance ID lookup: %s", err)
 		}
@@ -87,12 +90,17 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 	client := egoscale.NewClient(endpoint.String(), c.Key, c.Secret)
 	client.Timeout = 1 * time.Minute
 
-	vm := &egoscale.VirtualMachine{
-		ID: instanceID,
-	}
-	if err = client.Get(vm); err != nil {
+	resp, err := client.Get(
+		egoscale.VirtualMachine{
+			ID: &egoscale.UUID{
+				UUID: instanceID,
+			},
+		})
+	if err != nil {
 		return nil, err
 	}
+
+	vm := resp.(*egoscale.VirtualMachine)
 
 	nic := vm.DefaultNic()
 	if nic == nil {
@@ -101,15 +109,15 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 
 	return &exoscaleElasticIPProvider{
 		client:     client,
-		instanceID: instanceID,
+		instanceID: vm.ID,
 		nicID:      nic.ID,
 	}, nil
 }
 
 type exoscaleElasticIPProvider struct {
 	client     *egoscale.Client
-	instanceID string
-	nicID      string
+	instanceID *egoscale.UUID
+	nicID      *egoscale.UUID
 }
 
 func (p *exoscaleElasticIPProvider) Test(ctx context.Context) error {
@@ -140,7 +148,7 @@ type exoscaleElasticIPRefresher struct {
 	network netAddress
 	logger  *logrus.Entry
 	client  *egoscale.Client
-	nicID   string
+	nicID   *egoscale.UUID
 }
 
 func (r *exoscaleElasticIPRefresher) String() string {

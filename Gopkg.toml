@@ -31,7 +31,11 @@
 
 [[constraint]]
   name = "github.com/exoscale/egoscale"
-  version = "0.9.31"
+  version = "0.13.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/exoscale/exoip"
 
 [prune]
   go-tests = true
