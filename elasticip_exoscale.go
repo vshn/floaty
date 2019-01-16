@@ -84,7 +84,8 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 	logrus.WithField("instance-id", instanceID).Debug("Instance ID")
 
 	// The timeout is only used when no explicitly context is given
-	client := egoscale.NewClientWithTimeout(endpoint.String(), c.Key, c.Secret, 1*time.Minute)
+	client := egoscale.NewClient(endpoint.String(), c.Key, c.Secret)
+	client.Timeout = 1 * time.Minute
 
 	vm := &egoscale.VirtualMachine{
 		ID: instanceID,
