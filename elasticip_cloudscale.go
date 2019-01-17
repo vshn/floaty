@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	cloudscale "github.com/cloudscale-ch/cloudscale-go-sdk"
-	"github.com/google/uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 type cloudscaleNotifyConfig struct {
@@ -26,28 +26,26 @@ type cloudscaleNotifyConfig struct {
 }
 
 func (cfg cloudscaleNotifyConfig) findServerUUID(hostname string) (uuid.UUID, error) {
-	nullUUID := uuid.UUID{}
-
-	if cfg.ServerUUID != nullUUID {
+	if cfg.ServerUUID != uuid.Nil {
 		// Directly specified in config
 		return cfg.ServerUUID, nil
 	}
 
-	if serverUUID, ok := cfg.HostnameToServerUUID[hostname]; ok && serverUUID != nullUUID {
+	if serverUUID, ok := cfg.HostnameToServerUUID[hostname]; ok && serverUUID != uuid.Nil {
 		// Found using hostname
 		return serverUUID, nil
 	}
 
 	md, err := findCloudscaleServerMetadata()
 	if err != nil {
-		return nullUUID, fmt.Errorf("Failed to retrieve Cloudscale server metadata: %s", err)
+		return uuid.Nil, fmt.Errorf("Failed to retrieve Cloudscale server metadata: %s", err)
 	}
 
 	if md.Meta.CloudscaleUUID != nil {
 		return *md.Meta.CloudscaleUUID, nil
 	}
 
-	return nullUUID, fmt.Errorf("Server UUID not found with hostname %q", hostname)
+	return uuid.Nil, fmt.Errorf("Server UUID not found with hostname %q", hostname)
 }
 
 func (cfg cloudscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
@@ -83,7 +81,7 @@ func (cfg cloudscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 	}
 
 	switch serverUUID.Variant() {
-	case uuid.RFC4122, uuid.Microsoft:
+	case uuid.VariantRFC4122, uuid.VariantMicrosoft:
 		break
 	default:
 		return nil, fmt.Errorf("Invalid UUID %q", serverUUID)

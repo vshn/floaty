@@ -37,9 +37,10 @@ func init() {
 const flagUsage = "{ -T <config-path> | <config-path> [group|instance] <vrrp-name> <vrrp-status> <priority> }"
 
 type notifyProgram struct {
-	config    notifyConfig
-	addresses []netAddress
-	lock      lockfile.Lockfile
+	config            notifyConfig
+	addresses         []netAddress
+	lock              lockfile.Lockfile
+	keepalivedProcess *keepalivedProcess
 }
 
 // Attempt to acquire a file-based lock or, if that isn't possible within
@@ -145,6 +146,10 @@ func (p notifyProgram) notifyMaster() {
 
 		cancelFunc()
 	}()
+
+	if p.keepalivedProcess != nil {
+		go p.keepalivedProcess.waitForTermination(ctx, cancelFunc)
+	}
 
 	wg := sync.WaitGroup{}
 
@@ -291,6 +296,19 @@ func main() {
 	}
 
 	logrus.WithField("addresses", p.addresses).Infof("IP addresses")
+
+	// Keepalived does not terminate long-running notification programs when
+	// exiting. In addition Keepalived may be terminated through other means
+	// such as SIGKILL. In such cases the IP address updates must stop as soon
+	// as possible. As of Keepalived 1.2, shipped with OpenShift 3.9, there is
+	// no mechanism to reliably detect that Keepalived has terminated. Later
+	// versions have support for FIFOs to communicate to notification programs.
+	// Therefore the only reasonable method is to locate the process ID of
+	// Keepalived and polling for its validity in a regular interval.
+	if p.keepalivedProcess, err = findKeepalivedProcessParent(); err != nil {
+		logrus.Warningf("Keepalived not found: %s", err)
+		p.keepalivedProcess = nil
+	}
 
 	{
 		lockFilePath := p.config.MakeLockFilePath(vrrpInstanceName)

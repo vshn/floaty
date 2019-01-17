@@ -10,8 +10,8 @@
   name = "github.com/cloudscale-ch/cloudscale-go-sdk"
 
 [[constraint]]
-  name = "github.com/google/uuid"
-  version = "0.2.0"
+  name = "github.com/satori/go.uuid"
+  version = "1.2.0"
 
 [[constraint]]
   branch = "master"
@@ -31,7 +31,11 @@
 
 [[constraint]]
   name = "github.com/exoscale/egoscale"
-  version = "0.9.31"
+  version = "0.13.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/exoscale/exoip"
 
 [prune]
   go-tests = true
