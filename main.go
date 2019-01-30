@@ -277,6 +277,7 @@ func main() {
 		"config-file":   configFile,
 		"instance-name": vrrpInstanceName,
 		"status":        vrrpStatus,
+		"version":       newVersionInfo().HumanReadable(),
 	}).Info("Hello world")
 
 	p := notifyProgram{}
