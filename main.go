@@ -21,10 +21,15 @@ var verboseOutput bool
 var jsonLog bool
 var testMode bool
 
+const (
+	envNameVerbose string = "URSULA_LOG_VERBOSE"
+)
+
 func init() {
-	for _, i := range []string{"v", "verbose"} {
-		flag.BoolVar(&verboseOutput, i, false, "Verbose logging")
-	}
+	flag.BoolVar(&verboseOutput, "v", false, "")
+	flag.BoolVar(&verboseOutput, "verbose", false,
+		fmt.Sprintf("Verbose logging (environment variable: %s)",
+			envNameVerbose))
 
 	flag.BoolVar(&jsonLog, "json-log", false, "Log output in JSON format")
 
@@ -168,7 +173,7 @@ func (p notifyProgram) notifyMaster() {
 }
 
 func useVerboseLogging() bool {
-	return verboseOutput || (len(os.Getenv("URSULA_LOG_VERBOSE")) > 0)
+	return verboseOutput || (len(os.Getenv(envNameVerbose)) > 0)
 }
 
 func readAddressesFromKeepalivedConfig(path, vrrpInstanceName string) ([]netAddress, error) {
