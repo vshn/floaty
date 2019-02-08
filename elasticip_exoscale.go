@@ -194,7 +194,7 @@ func (r *exoscaleElasticIPRefresher) Refresh(ctx context.Context) error {
 			"vm-nic":  nic,
 		}).Debugf("Virtual machine %q", vm.Name)
 
-		if nic.ID == r.nicID {
+		if nic.ID != nil && r.nicID.Equal(*nic.ID) {
 			// Desired target
 			continue
 		}
