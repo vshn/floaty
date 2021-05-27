@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.11 AS ursula-builder
+FROM docker.io/library/golang:1.16 AS ursula-builder
 
 ARG DEP_VERSION=0.5.0
 
