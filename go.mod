@@ -3,7 +3,7 @@ module github.com/vshn/floaty
 go 1.16
 
 require (
-	github.com/cenkalti/backoff v2.2.1+incompatible
+	github.com/cenkalti/backoff/v4 v4.1.0
 	github.com/cloudscale-ch/cloudscale-go-sdk v1.6.0
 	github.com/exoscale/egoscale v0.53.0
 	github.com/exoscale/exoip v0.4.3

@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/cenkalti/backoff"
-	ps "github.com/mitchellh/go-ps"
+	"github.com/cenkalti/backoff/v4"
+	"github.com/mitchellh/go-ps"
 	"github.com/sirupsen/logrus"
 )
 

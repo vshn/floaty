@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenkalti/backoff"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/exoscale/egoscale"
 	"github.com/exoscale/exoip"
 	"github.com/gofrs/uuid"
