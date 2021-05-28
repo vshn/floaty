@@ -1,4 +1,5 @@
 /floaty
 /.idea
 dist/
+.github/release-notes.md
 *.out
