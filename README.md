@@ -1,5 +1,12 @@
 # Floaty
 
+[![](https://img.shields.io/github/workflow/status/vshn/floaty/Release)](https://github.com/vshn/floaty/actions)
+[![](https://img.shields.io/github/v/release/vshn/floaty)](https://github.com/vshn/floaty/releases)
+![](https://img.shields.io/github/go-mod/go-version/vshn/floaty)
+[![](https://img.shields.io/github/downloads/vshn/floaty/total)](https://github.com/vshn/floaty/releases)
+[![](https://img.shields.io/badge/container-quay.io-green)](https://quay.io/repository/vshn/floaty?tab=tags)
+[![](https://img.shields.io/github/license/vshn/floaty)](https://github.com/vshn/floaty/blob/master/LICENSE)
+
 **Cloud provider API integration for Keepalived**
 
 Floaty is a program suitable for use by a Keepalived notification script. By
@@ -108,7 +115,7 @@ pseudo file.
 The configuration shown is for demonstration, not a recommendation.
 
 ```
-lock-file-template: "/tmp/floaty-%s.lock"
+lock-file-template: "/var/run/floaty.%s.lock"
 
 refresh-interval: 2m
 
