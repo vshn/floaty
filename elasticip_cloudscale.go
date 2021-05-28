@@ -186,22 +186,22 @@ func (r *cloudscaleFloatingIPRefresher) Refresh(ctx context.Context) error {
 		Server: serverUUID,
 	}
 
-	response, err := client.FloatingIPs.Update(ctx, ip, req)
+	err := client.FloatingIPs.Update(ctx, ip, req)
+	if err != nil {
+		r.logger.Errorf("Setting next-hop of address %s to server %s failed: %s",
+			ip, serverUUID, err)
 
-	if err == nil {
-		r.logger.WithField("response", response).Debug("Refresh successful")
-		return nil
-	}
-
-	r.logger.Errorf("Setting next-hop of address %s to server %s failed: %s",
-		ip, serverUUID, err)
-
-	if apiError, ok := err.(*cloudscale.ErrorResponse); ok {
-		if apiError.StatusCode >= 400 && apiError.StatusCode < 500 {
-			// Client error
-			return backoff.Permanent(apiError)
+		if apiError, ok := err.(*cloudscale.ErrorResponse); ok {
+			if apiError.StatusCode >= 400 && apiError.StatusCode < 500 {
+				// Client error
+				return backoff.Permanent(apiError)
+			}
 		}
+
+		return err
 	}
 
-	return err
+	r.logger.Debug("Refresh successful")
+	return nil
+
 }
