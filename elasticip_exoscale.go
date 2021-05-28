@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -11,7 +12,7 @@ import (
 	"github.com/cenkalti/backoff"
 	"github.com/exoscale/egoscale"
 	"github.com/exoscale/exoip"
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -78,7 +79,7 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 
 	instanceID := c.InstanceID
 
-	if uuid.Equal(c.InstanceID, uuid.Nil) {
+	if bytes.Equal(c.InstanceID.Bytes(), uuid.Nil.Bytes()) {
 		if instanceID, err = findExoscaleInstanceID(); err != nil {
 			return nil, fmt.Errorf("Instance ID lookup: %s", err)
 		}

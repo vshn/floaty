@@ -13,8 +13,8 @@ import (
 	"github.com/cenkalti/backoff"
 	"github.com/sirupsen/logrus"
 
-	cloudscale "github.com/cloudscale-ch/cloudscale-go-sdk"
-	uuid "github.com/satori/go.uuid"
+	"github.com/cloudscale-ch/cloudscale-go-sdk"
+	"github.com/gofrs/uuid"
 )
 
 type cloudscaleNotifyConfig struct {
