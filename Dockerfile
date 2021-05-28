@@ -1,11 +1,4 @@
-FROM docker.io/library/golang:1.11 AS floaty-builder
-
-ARG DEP_VERSION=0.5.0
-
-RUN \
-  curl --location --output "$GOPATH/bin/dep" \
-    "https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64" && \
-  chmod +x "$GOPATH/bin/dep"
+FROM docker.io/library/golang:1.16 AS floaty-builder
 
 ENV CGO_ENABLED=0
 ENV GOOS=linux
@@ -14,9 +7,8 @@ ENV GOARCH=amd64
 WORKDIR /go/src/floaty
 
 # Pre-build dependencies
-COPY Gopkg.toml Gopkg.lock ./
-RUN dep ensure -v -vendor-only
-RUN go build -v ./vendor/...
+COPY go.* .
+RUN go mod download
 
 ARG CI_COMMIT_REF_NAME=
 ARG CI_COMMIT_SHA=
