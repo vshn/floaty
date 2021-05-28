@@ -22,7 +22,7 @@ var jsonLog bool
 var testMode bool
 
 const (
-	envNameVerbose string = "URSULA_LOG_VERBOSE"
+	envNameVerbose string = "FLOATY_LOG_VERBOSE"
 )
 
 func init() {

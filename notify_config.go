@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	defaultLockFileTemplate = "/var/lock/ursula-%s.lock"
+	defaultLockFileTemplate = "/var/lock/floaty-%s.lock"
 	defaultLockTimeout      = 10 * time.Second
 
 	defaultKeepalivedConfigFile = "/etc/keepalived/keepalived.conf"
