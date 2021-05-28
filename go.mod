@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/cloudscale-ch/cloudscale-go-sdk v0.0.0-20180926131223-17fbddda00c8
-	github.com/exoscale/egoscale v0.13.3
+	github.com/exoscale/egoscale v0.53.0
 	github.com/exoscale/exoip v0.4.3
 	github.com/mitchellh/go-ps v0.0.0-20170309133038-4fdf99ab2936
 	github.com/nightlyone/lockfile v0.0.0-20180618180623-0ad87eef1443
