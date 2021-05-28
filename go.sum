@@ -5,11 +5,10 @@ github.com/cloudscale-ch/cloudscale-go-sdk v0.0.0-20180926131223-17fbddda00c8/go
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/exoscale/egoscale v0.13.0/go.mod h1:SHSox0l8ud/I8Q6joR7Oj96DFer0mdo1cQzb7dmZgro=
-github.com/exoscale/egoscale v0.13.2 h1:nbcHOkDg1ZU5s/2eIFD6tYYK8qsz1Fzdlh6vpVF2m+0=
-github.com/exoscale/egoscale v0.13.2/go.mod h1:SHSox0l8ud/I8Q6joR7Oj96DFer0mdo1cQzb7dmZgro=
-github.com/exoscale/exoip v0.4.3-0.20181218081046-0be5036221ce h1:A1NPxsiWMjdHNPzzz6afh+T1/YZ2xotCAH6S919uiOU=
-github.com/exoscale/exoip v0.4.3-0.20181218081046-0be5036221ce/go.mod h1:qa2PUt3rsNpV6V9z0EW3l/b5Ifttj4ZGOpTAMAaVnRY=
+github.com/exoscale/egoscale v0.13.3 h1:G3EwTFvdcuFMrfsIWejzPawNjoN8SRIwxIFJ1l6Iero=
+github.com/exoscale/egoscale v0.13.3/go.mod h1:SHSox0l8ud/I8Q6joR7Oj96DFer0mdo1cQzb7dmZgro=
+github.com/exoscale/exoip v0.4.3 h1:bpVwU08KiJKGzG3gywWCOX9RqPpjdo1OhJWpEcMFxks=
+github.com/exoscale/exoip v0.4.3/go.mod h1:0p1Bk1p5s4r7TXGg8//Gy/mzrXJ0FL4Q9l7CKxMuzsM=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1 h1:mweAR1A6xJ3oS2pRaGiHgQ4OO8tzTaLawm8vnODuwDk=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/mitchellh/go-ps v0.0.0-20170309133038-4fdf99ab2936 h1:kw1v0NlnN+GZcU8Ma8CLF2Zzgjfx95gs3/GN3vYAPpo=
