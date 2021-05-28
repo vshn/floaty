@@ -108,7 +108,7 @@ pseudo file.
 The configuration shown is for demonstration, not a recommendation.
 
 ```
-lock-file-template: "/tmp/floaty-%s.lock"
+lock-file-template: "/var/run/floaty.%s.lock"
 
 refresh-interval: 2m
 

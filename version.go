@@ -6,21 +6,22 @@ import (
 )
 
 // Set at build time
-var commitRefName, commitSHA string
+var version, commit, date string
 
 type versionInfo struct {
 	VersionString string
 	CommitID      string
+	Date          string
 }
 
 func newVersionInfo() versionInfo {
-	refName := commitRefName
+	refName := version
 
 	if len(refName) == 0 {
 		refName = "ver-unknown"
 	}
 
-	id := []rune(commitSHA)
+	id := []rune(commit)
 
 	if len(id) > 10 {
 		id = id[:10]
@@ -29,6 +30,7 @@ func newVersionInfo() versionInfo {
 	return versionInfo{
 		VersionString: refName,
 		CommitID:      string(id),
+		Date:          date,
 	}
 }
 
@@ -37,7 +39,7 @@ func (v versionInfo) HumanReadable() string {
 		return v.VersionString
 	}
 
-	return fmt.Sprintf("%s (commit %s)", v.VersionString, v.CommitID)
+	return fmt.Sprintf("%s (commit %s, %s)", v.VersionString, v.CommitID, v.Date)
 }
 
 func (v versionInfo) HTTPUserAgent() string {
@@ -47,6 +49,7 @@ func (v versionInfo) HTTPUserAgent() string {
 
 	if len(v.CommitID) > 0 {
 		extra = append(extra, "commit "+v.CommitID)
+		extra = append(extra, "date "+v.Date)
 	}
 
 	return fmt.Sprintf("Floaty by vshn.ch (%s)", strings.Join(extra, "; "))
