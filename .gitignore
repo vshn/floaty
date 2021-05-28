@@ -1,4 +1,4 @@
-/vendor/
 /floaty
 /.idea
 dist/
+*.out
