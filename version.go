@@ -49,5 +49,5 @@ func (v versionInfo) HTTPUserAgent() string {
 		extra = append(extra, "commit "+v.CommitID)
 	}
 
-	return fmt.Sprintf("Ursula by APPUiO.ch (%s)", strings.Join(extra, "; "))
+	return fmt.Sprintf("Floaty by vshn.ch (%s)", strings.Join(extra, "; "))
 }

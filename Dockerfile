@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.11 AS ursula-builder
+FROM docker.io/library/golang:1.11 AS floaty-builder
 
 ARG DEP_VERSION=0.5.0
 
@@ -11,7 +11,7 @@ ENV CGO_ENABLED=0
 ENV GOOS=linux
 ENV GOARCH=amd64
 
-WORKDIR /go/src/git.vshn.net/appuio-public/ursula
+WORKDIR /go/src/floaty
 
 # Pre-build dependencies
 COPY Gopkg.toml Gopkg.lock ./
@@ -22,7 +22,7 @@ ARG CI_COMMIT_REF_NAME=
 ARG CI_COMMIT_SHA=
 
 # Build main code
-COPY --chown=0:0 [".", "/go/src/git.vshn.net/appuio-public/ursula"]
+COPY --chown=0:0 [".", "/go/src/floaty"]
 RUN \
   set -e && \
   packages=$(go list ./...) || exit 1; \
@@ -36,7 +36,7 @@ RUN \
   ldflags="${ldflags} -s -w" && \
   ldflags="${ldflags} -X 'main.commitRefName=${CI_COMMIT_REF_NAME}'" && \
   ldflags="${ldflags} -X 'main.commitSHA=${CI_COMMIT_SHA}'" && \
-  exec go build -v -tags netgo -ldflags "$ldflags" -o /tmp/ursula .
+  exec go build -v -tags netgo -ldflags "$ldflags" -o /tmp/floaty .
 
 # The main binary is statically linked, but it requires access to the TLS root
 # certificates to verify connections.
@@ -44,8 +44,8 @@ FROM docker.io/library/alpine:latest
 
 RUN apk add --no-cache tini ca-certificates
 
-COPY --from=ursula-builder --chown=0:0 /tmp/ursula /bin/ursula
+COPY --from=floaty-builder --chown=0:0 /tmp/floaty /bin/floaty
 
-ENTRYPOINT ["/sbin/tini", "--", "/bin/ursula"]
+ENTRYPOINT ["/sbin/tini", "--", "/bin/floaty"]
 
 # vim: set sw=2 sts=2 et :

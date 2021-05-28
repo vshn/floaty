@@ -4,8 +4,8 @@ variables: &global_variables
   DOCKER_HOST: tcp://docker:2375
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   FPM_IMAGE_TAG: $CI_REGISTRY_IMAGE:${CI_COMMIT_REF_NAME}-fpm
-  PACKAGE_NAME: ursula
-  PACKAGE_URL: https://git.vshn.net/appuio-public/ursula/
+  PACKAGE_NAME: floaty
+  PACKAGE_URL: https://github.com/vshn/floaty/
   PACKAGE_DESC: Cloud provider API integration for Keepalived
 
 stages:
@@ -45,7 +45,7 @@ build:
     - test -d _artifacts || mkdir -v _artifacts
     - |-
       docker run --rm --entrypoint /bin/tar "$IMAGE_TAG" -C / -cf - \
-        bin/ursula \
+        bin/floaty \
         > _artifacts/package.tar
 
     - docker push "$IMAGE_TAG"

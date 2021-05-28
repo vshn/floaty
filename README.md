@@ -1,14 +1,14 @@
-# Ursula
+# Floaty
 
 **Cloud provider API integration for Keepalived**
 
-Ursula is a program suitable for use by a Keepalived notification script. By
+Floaty is a program suitable for use by a Keepalived notification script. By
 regularily enforcing the destination of a floating or elastic IP address it
 ensures that split-brain situations or external modifications to the
 destination have little impact.
 
-For VRRP instances in `MASTER` status Ursula reads the Keepalived
-configuration. When no addresses are configured in the Ursula configuration
+For VRRP instances in `MASTER` status Floaty reads the Keepalived
+configuration. When no addresses are configured in the Floaty configuration
 the IP addresses assigned to the given VRRP instance are managed.
 Managing an IP address means to refresh its target host via a provider-specific
 API in a regular interval. Failures are handled gracefully.
@@ -23,7 +23,7 @@ Logs are written to standard error.
 ## Command line flags
 
 * `--verbose`: Produce more log messages. May also be enabled by setting the
-  `URSULA_LOG_VERBOSE` environment variable to a non-empty value.
+  `FLOATY_LOG_VERBOSE` environment variable to a non-empty value.
 
 * `--json-log`: Output log messages in JSON format for further processing.
 
@@ -34,7 +34,7 @@ Configuration data must be supplied as a YAML file. The top level is a map.
 
 * `lock-file-template`: Template for path to lock file for each VRRP instance.
   Must contain a single `%s` to be replaced by VRRP instance name. Defaults to
-  `/var/lock/ursula-%s.lock`.
+  `/var/lock/floaty-%s.lock`.
 
 * `lock-timeout`: How long to wait for lock as a duration. Defaults to 10
   seconds.
@@ -108,7 +108,7 @@ pseudo file.
 The configuration shown is for demonstration, not a recommendation.
 
 ```
-lock-file-template: "/tmp/ursula-%s.lock"
+lock-file-template: "/tmp/floaty-%s.lock"
 
 refresh-interval: 2m
 
@@ -139,14 +139,14 @@ managed-addresses:
 
 Keepalived as of version 1.2.24 always redirects the output of notification
 scripts to `/dev/null` and does not support passing custom parameters. Because
-Ursula requires a configuration file a wrapper needs to be used. In most cases
+floaty requires a configuration file a wrapper needs to be used. In most cases
 a shell script is suitable. Example:
 
 ```
 #!/bin/sh
 
-/usr/bin/ursula /etc/keepalived/ursula-prod.yml "$@" 2>&1 | \
-  logger --tag ursula-prod
+/usr/bin/floaty /etc/keepalived/floaty-prod.yml "$@" 2>&1 | \
+  logger --tag floaty-prod
 ```
 
 
@@ -159,18 +159,18 @@ PID 1.
 ```
 #!/bin/sh
 
-exec /bin/ursula --json-log /etc/ursula.yml "$@" \
+exec /bin/floaty --json-log /etc/floaty.yml "$@" \
   >>/proc/1/fd/1 2>>/proc/1/fd/2
 ```
 
 
 ### Test mode
 
-Ursula implements provider-specific self-tests which can be run outside of
+Floaty implements provider-specific self-tests which can be run outside of
 Keepalived.
 
 ```
-/bin/ursula --json-log --verbose --test /etc/ursula.yml
+/bin/floaty --json-log --verbose --test /etc/floaty.yml
 ```
 
 
