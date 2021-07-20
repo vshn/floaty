@@ -13,8 +13,8 @@ github.com/deepmap/oapi-codegen v1.6.1 h1:2BvsmRb6pogGNtr8Ann+esAbSKFXx2CZN18VpA
 github.com/deepmap/oapi-codegen v1.6.1/go.mod h1:ryDa9AgbELGeB+YEXE1dR53yAjHwFvE9iAUlWl9Al3M=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/exoscale/egoscale v0.13.3/go.mod h1:SHSox0l8ud/I8Q6joR7Oj96DFer0mdo1cQzb7dmZgro=
-github.com/exoscale/egoscale v0.56.0 h1:N8nt0wMrNWEg4l+D8fJu6Q4lpRyMasnql3K8On+Uk0o=
-github.com/exoscale/egoscale v0.56.0/go.mod h1:wi0myUxPsV8SdEtdJHQJxFLL/wEw9fiw9Gs1PWRkvkM=
+github.com/exoscale/egoscale v0.64.0 h1:dVvd+ykUs1PJgSK2thvvdY+JuCYYGCJlxQYGCxBeQRc=
+github.com/exoscale/egoscale v0.64.0/go.mod h1:wi0myUxPsV8SdEtdJHQJxFLL/wEw9fiw9Gs1PWRkvkM=
 github.com/exoscale/exoip v0.4.3 h1:bpVwU08KiJKGzG3gywWCOX9RqPpjdo1OhJWpEcMFxks=
 github.com/exoscale/exoip v0.4.3/go.mod h1:0p1Bk1p5s4r7TXGg8//Gy/mzrXJ0FL4Q9l7CKxMuzsM=
 github.com/getkin/kin-openapi v0.53.0/go.mod h1:7Yn5whZr5kJi6t+kShccXS8ae1APpYTW6yheSwk8Yi4=
