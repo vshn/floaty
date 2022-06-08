@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/cenkalti/backoff/v4 v4.1.1
 	github.com/cloudscale-ch/cloudscale-go-sdk v1.7.1
-	github.com/exoscale/egoscale v0.88.2
+	github.com/exoscale/egoscale v1.19.0
 	github.com/exoscale/exoip v0.4.3
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/mitchellh/go-ps v1.0.0
