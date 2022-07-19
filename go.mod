@@ -10,7 +10,7 @@ require (
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/nightlyone/lockfile v1.0.0
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.0
 	gopkg.in/yaml.v2 v2.4.0
 )
