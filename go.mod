@@ -11,7 +11,7 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/nightlyone/lockfile v1.0.0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -19,7 +19,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deepmap/oapi-codegen v1.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/objx v0.4.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/vishvananda/netlink v1.0.0 // indirect
 	github.com/vishvananda/netns v0.0.0-20180720170159-13995c7128cc // indirect
 	golang.org/x/sys v0.0.0-20211103235746-7861aae1554b // indirect
