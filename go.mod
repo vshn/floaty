@@ -1,6 +1,6 @@
 module github.com/vshn/floaty
 
-go 1.16
+go 1.19
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.3
@@ -13,4 +13,15 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.8.0
 	gopkg.in/yaml.v2 v2.4.0
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/deepmap/oapi-codegen v1.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/objx v0.4.0 // indirect
+	github.com/vishvananda/netlink v1.0.0 // indirect
+	github.com/vishvananda/netns v0.0.0-20180720170159-13995c7128cc // indirect
+	golang.org/x/sys v0.0.0-20211103235746-7861aae1554b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
