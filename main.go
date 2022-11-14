@@ -133,7 +133,7 @@ func (p notifyProgram) notifyMaster() {
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 
-	exitSignal := make(chan os.Signal)
+	exitSignal := make(chan os.Signal, 1)
 
 	signal.Notify(exitSignal, syscall.SIGINT, syscall.SIGTERM)
 
