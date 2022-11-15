@@ -20,6 +20,7 @@ import (
 var verboseOutput bool
 var jsonLog bool
 var testMode bool
+var dryRun bool
 
 const (
 	envNameVerbose string = "FLOATY_LOG_VERBOSE"
@@ -32,6 +33,7 @@ func init() {
 			envNameVerbose))
 
 	flag.BoolVar(&jsonLog, "json-log", false, "Log output in JSON format")
+	flag.BoolVar(&dryRun, "dry-run", false, "Don't make calls to a cloud provider")
 
 	for _, i := range []string{"T", "test"} {
 		flag.BoolVar(&testMode, i, false,
@@ -289,6 +291,10 @@ func main() {
 
 	if p.config, err = loadConfig(configFile); err != nil {
 		log.Fatal(err)
+	}
+
+	if dryRun {
+		p.config.Provider = "fake"
 	}
 
 	p.addresses, err =
