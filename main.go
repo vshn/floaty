@@ -111,10 +111,10 @@ func (p notifyProgram) acquireLockOrDie() {
 	logrus.Debugf("Lock on file %q acquired", p.lock)
 }
 
-func (p notifyProgram) notifyNoop() {
+func (p notifyProgram) notifyNoop(ctx context.Context) {
 }
 
-func (p notifyProgram) notifyMaster() {
+func (p notifyProgram) notifyMaster(ctx context.Context) {
 	provider, err := p.config.NewProvider()
 	if err != nil {
 		logrus.Fatal(err)
@@ -124,53 +124,22 @@ func (p notifyProgram) notifyMaster() {
 
 	for _, address := range p.addresses {
 		logger := logrus.WithField("address", address)
-
 		refresher, err := provider.NewElasticIPRefresher(logger, address)
 		if err != nil {
 			logrus.Fatal(err)
 		}
-
 		refreshers = append(refreshers, refresher)
 	}
 
-	ctx, cancelFunc := context.WithCancel(context.Background())
-
-	exitSignal := make(chan os.Signal, 1)
-
-	signal.Notify(exitSignal, syscall.SIGINT, syscall.SIGTERM)
-
-	// Handle signals
-	go func() {
-		var signum = -1
-
-		receivedSignal := <-exitSignal
-
-		if sysSignal, ok := receivedSignal.(syscall.Signal); ok {
-			signum = int(sysSignal)
-		}
-
-		logrus.Infof("Received signal %d (%s)", signum, receivedSignal.String())
-
-		cancelFunc()
-	}()
-
-	if p.keepalivedProcess != nil {
-		go p.keepalivedProcess.waitForTermination(ctx, cancelFunc)
-	}
-
 	wg := sync.WaitGroup{}
-
-	// Start all refreshers before waiting for them to terminate
 	for _, i := range refreshers {
 		wg.Add(1)
 
 		go func(refresher elasticIPRefresher) {
 			defer wg.Done()
-
 			runRefresher(ctx, p.config, refresher)
 		}(i)
 	}
-
 	wg.Wait()
 }
 
@@ -226,6 +195,9 @@ func providerTest(path string) error {
 
 func main() {
 	var err error
+	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	logrus.SetOutput(os.Stderr)
 	logrus.SetLevel(logrus.DebugLevel)
@@ -320,6 +292,8 @@ func main() {
 	if p.keepalivedProcess, err = findKeepalivedProcessParent(); err != nil {
 		logrus.Warningf("Keepalived not found: %s", err)
 		p.keepalivedProcess = nil
+	} else {
+		go p.keepalivedProcess.waitForTermination(ctx, stop)
 	}
 
 	{
@@ -331,7 +305,7 @@ func main() {
 		}
 	}
 
-	statusFunc := map[string]func(){
+	statusFunc := map[string]func(context.Context){
 		"fault":  p.notifyNoop,
 		"master": p.notifyMaster,
 		"backup": p.notifyNoop,
@@ -350,5 +324,5 @@ func main() {
 		}
 	}()
 
-	fn()
+	fn(ctx)
 }
