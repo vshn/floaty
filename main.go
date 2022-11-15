@@ -12,8 +12,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
-	"github.com/nightlyone/lockfile"
 	"github.com/sirupsen/logrus"
 )
 
@@ -46,69 +44,7 @@ const flagUsage = "{ -T <config-path> | <config-path> [group|instance] <vrrp-nam
 type notifyProgram struct {
 	config            notifyConfig
 	addresses         []netAddress
-	lock              lockfile.Lockfile
 	keepalivedProcess *keepalivedProcess
-}
-
-// Attempt to acquire a file-based lock or, if that isn't possible within
-// a configurable amount of time, exit with an error message. If there is
-// already a process owning the lock it's sent a SIGTERM signal.
-func (p notifyProgram) acquireLockOrDie() {
-	sentSIGTERM := false
-
-	fn := func() error {
-		err := p.lock.TryLock()
-
-		if err == nil {
-			return nil
-		}
-
-		if err == lockfile.ErrBusy && !sentSIGTERM {
-			if proc, errOwner := p.lock.GetOwner(); errOwner == nil && proc != nil {
-				// Tell existing process to terminate
-				if errSigterm := proc.Signal(syscall.SIGTERM); errSigterm == nil {
-					logrus.Debugf("Sent SIGTERM to PID %d", proc.Pid)
-					sentSIGTERM = true
-				} else {
-					logrus.Warningf("Sending SIGTERM to PID %d failed: %s", proc.Pid, errSigterm)
-				}
-			}
-
-			return err
-		}
-
-		if _, ok := err.(lockfile.TemporaryError); ok {
-			// Try again
-			return err
-		}
-
-		switch err {
-		case lockfile.ErrInvalidPid, lockfile.ErrDeadOwner, lockfile.ErrRogueDeletion:
-			// Try again
-			return err
-		}
-
-		// Give up for unknown errors
-		return backoff.Permanent(err)
-	}
-
-	bo := backoff.NewExponentialBackOff()
-	bo.InitialInterval = 10 * time.Millisecond
-	bo.MaxInterval = 100 * time.Millisecond
-	bo.MaxElapsedTime = p.config.LockTimeout
-	bo.Reset()
-
-	if err := backoff.Retry(fn, bo); err != nil {
-		logrus.Fatal(err)
-	}
-
-	if proc, err := p.lock.GetOwner(); err != nil {
-		logrus.Fatalf("Getting lock owner: %s", err)
-	} else if proc.Pid != os.Getpid() {
-		logrus.Fatalf("Lock owned by PID %d", proc.Pid)
-	}
-
-	logrus.Debugf("Lock on file %q acquired", p.lock)
 }
 
 func (p notifyProgram) notifyNoop(ctx context.Context) {
@@ -295,16 +231,6 @@ func main() {
 	} else {
 		go p.keepalivedProcess.waitForTermination(ctx, stop)
 	}
-
-	{
-		lockFilePath := p.config.MakeLockFilePath(vrrpInstanceName)
-
-		p.lock, err = lockfile.New(lockFilePath)
-		if err != nil {
-			logrus.Fatalf("Initializing lock file %q: %s", lockFilePath, err)
-		}
-	}
-
 	statusFunc := map[string]func(context.Context){
 		"fault":  p.notifyNoop,
 		"master": p.notifyMaster,
@@ -316,11 +242,13 @@ func main() {
 		logrus.Fatalf("Unrecognized VRRP status %q", vrrpStatus)
 	}
 
-	p.acquireLockOrDie()
-
+	unlock, err := acquireLock(ctx, p.config.MakeLockFilePath(vrrpInstanceName), p.config.LockTimeout)
+	if err != nil {
+		logrus.Fatalf("Failed to acquire lock: %s", err)
+	}
 	defer func() {
-		if err := p.lock.Unlock(); err != nil {
-			logrus.Errorf("Unlocking %q failed: %s", p.lock, err)
+		if err := unlock(); err != nil {
+			logrus.Errorf("Unlocking failed: %s", err)
 		}
 	}()
 
