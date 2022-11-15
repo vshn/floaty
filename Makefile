@@ -47,6 +47,9 @@ test: test\:go ## All-in-one test target
 test\:go: ## Run unit tests
 	go test ./... -coverprofile cover.out
 
+test-e2e: build\:go
+	go test -tags=e2e -count=1
+
 clean: ## Cleans up the generated resources
 	rm -rf dist/ cover.out $(BIN_FILENAME)
 
