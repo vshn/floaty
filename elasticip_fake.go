@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 )
@@ -12,6 +13,8 @@ func NewFakeProvider() (elasticIPProvider, error) {
 }
 
 type fakeElasticIPProvider struct {
+	mu             sync.Mutex
+	refreshCounter map[string]int
 }
 
 func (p *fakeElasticIPProvider) Test(ctx context.Context) error {
@@ -21,9 +24,17 @@ func (p *fakeElasticIPProvider) Test(ctx context.Context) error {
 func (p *fakeElasticIPProvider) NewElasticIPRefresher(logger *logrus.Entry,
 	network netAddress) (elasticIPRefresher, error) {
 
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	if p.refreshCounter == nil {
+		p.refreshCounter = map[string]int{}
+	}
 	ref := &fakeElasticIPRefresher{
-		logger:  logger,
-		network: network,
+		network:        network,
+		logger:         logger,
+		mu:             &p.mu,
+		refreshCounter: p.refreshCounter,
 	}
 
 	return ref, nil
@@ -32,6 +43,9 @@ func (p *fakeElasticIPProvider) NewElasticIPRefresher(logger *logrus.Entry,
 type fakeElasticIPRefresher struct {
 	network netAddress
 	logger  *logrus.Entry
+
+	mu             *sync.Mutex
+	refreshCounter map[string]int
 }
 
 func (r *fakeElasticIPRefresher) Logger() *logrus.Entry {
@@ -39,6 +53,12 @@ func (r *fakeElasticIPRefresher) Logger() *logrus.Entry {
 }
 
 func (r *fakeElasticIPRefresher) Refresh(ctx context.Context) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	c := r.refreshCounter[r.network.String()]
+	r.refreshCounter[r.network.String()] = c + 1
+
 	fmt.Printf("REFRESH %s\n", r.network)
 	return nil
 }
