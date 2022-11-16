@@ -108,6 +108,9 @@ func loadConfig(path string, dryRun bool) (notifyConfig, error) {
 	if err := cfg.ReadFromYAML(path); err != nil {
 		return cfg, err
 	}
+	if dryRun {
+		cfg.Provider = "fake"
+	}
 
 	return cfg, nil
 }
