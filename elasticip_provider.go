@@ -18,12 +18,7 @@ type elasticIPRefresher interface {
 	Refresh(context.Context) error
 }
 
-func pinElasticIPs(ctx context.Context, addresses []netAddress, cfg notifyConfig) error {
-	provider, err := cfg.NewProvider()
-	if err != nil {
-		return err
-	}
-
+func pinElasticIPs(ctx context.Context, provider elasticIPProvider, addresses []netAddress, cfg notifyConfig) error {
 	refreshers := []elasticIPRefresher{}
 	for _, address := range addresses {
 		logger := logrus.WithField("address", address)

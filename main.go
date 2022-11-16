@@ -128,13 +128,18 @@ func runNotify(ctx context.Context, cfg notifyConfig) error {
 
 	unlock, err := acquireLock(ctx, cfg.MakeLockFilePath(vrrpInstanceName), cfg.LockTimeout)
 	if err != nil {
-		logrus.Fatalf("Failed to acquire lock: %s", err)
+		return fmt.Errorf("Failed to acquire lock: %w", err)
 	}
 	defer func() {
 		if err := unlock(); err != nil {
 			logrus.Errorf("Unlocking failed: %s", err)
 		}
 	}()
+
+	provider, err := cfg.NewProvider()
+	if err != nil {
+		return err
+	}
 
 	addresses, err := cfg.getAddresses(vrrpInstanceName)
 	if err != nil {
@@ -143,7 +148,7 @@ func runNotify(ctx context.Context, cfg notifyConfig) error {
 	logrus.WithField("addresses", addresses).Infof("IP addresses")
 
 	if strings.ToLower(vrrpStatus) == "master" {
-		return pinElasticIPs(ctx, addresses, cfg)
+		return pinElasticIPs(ctx, provider, addresses, cfg)
 	}
 	return nil
 }
