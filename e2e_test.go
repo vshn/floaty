@@ -100,6 +100,8 @@ func runCmd(cmd *exec.Cmd) (*bytes.Buffer, func() error, error) {
 }
 
 func expectUpdate(t *testing.T, buf *bytes.Buffer, addr string, n int) {
+	ctx, done := context.WithTimeout(context.TODO(), 8*time.Second)
+	defer done()
 	count := 0
 	for count < n {
 		var line string
@@ -107,6 +109,10 @@ func expectUpdate(t *testing.T, buf *bytes.Buffer, addr string, n int) {
 		line, err = buf.ReadString('\n')
 		for errors.Is(err, io.EOF) {
 			line, err = buf.ReadString('\n')
+			if ctx.Err() != nil {
+				assert.NoError(t, ctx.Err())
+				return
+			}
 		}
 		require.NoError(t, err)
 		assert.Equal(t, fmt.Sprintf("REFRESH %s\n", addr), line)
