@@ -15,6 +15,25 @@ type keepalivedProcess struct {
 	Proc *ps.UnixProcess
 }
 
+// Attempt to find Keepalived process in process parents and wait until Keepalived has terminated and call given function once that happens
+func WaitForKeepalivedTermination(ctx context.Context, stop context.CancelFunc) {
+	// Keepalived does not terminate long-running notification programs when
+	// exiting. In addition Keepalived may be terminated through other means
+	// such as SIGKILL. In such cases the IP address updates must stop as soon
+	// as possible. As of Keepalived 1.2, shipped with OpenShift 3.9, there is
+	// no mechanism to reliably detect that Keepalived has terminated. Later
+	// versions have support for FIFOs to communicate to notification programs.
+	// Therefore the only reasonable method is to locate the process ID of
+	// Keepalived and polling for its validity in a regular interval.
+	keepalivedProcess, err := findKeepalivedProcessParent()
+	if err != nil {
+		logrus.Warningf("Keepalived not found: %s", err)
+		keepalivedProcess = nil
+	} else {
+		go keepalivedProcess.waitForTermination(ctx, stop)
+	}
+}
+
 // Attempt to find Keepalived process in process parents.
 func findKeepalivedProcessParent() (*keepalivedProcess, error) {
 	proc, err := findParentProcess(keepalivedProcessName)
