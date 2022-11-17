@@ -34,6 +34,8 @@ Logs are written to standard error.
 
 * `--json-log`: Output log messages in JSON format for further processing.
 
+* `--dry-run`: Updates to Floating IPs are only logged and not performed.
+
 
 ## Configuration
 
@@ -180,6 +182,13 @@ Keepalived.
 /bin/floaty --json-log --verbose --test /etc/floaty.yml
 ```
 
+### FIFO mode
+
+Floaty can run in FIFO mode allowing it to process notification events through a FIFO instead of using notify scrips 
+
+```
+/bin/floaty --fifo /etc/floaty.yml /tmp/fifo
+```
 
 ## External links
 
