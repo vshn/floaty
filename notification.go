@@ -19,8 +19,8 @@ type NotificationStatus string
 
 const (
 	NotificationMaster NotificationStatus = "MASTER"
-	NotificationFault                     = "FAULT"
-	NotificationBackup                    = "BACKUP"
+	NotificationFault  NotificationStatus = "FAULT"
+	NotificationBackup NotificationStatus = "BACKUP"
 )
 
 func parseNotification(fields []string) (Notification, error) {
