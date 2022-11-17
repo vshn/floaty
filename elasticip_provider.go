@@ -32,7 +32,6 @@ func pinElasticIPs(ctx context.Context, provider elasticIPProvider, addresses []
 	wg := sync.WaitGroup{}
 	for _, i := range refreshers {
 		wg.Add(1)
-
 		go func(refresher elasticIPRefresher) {
 			defer wg.Done()
 			runRefresher(ctx, cfg.RefreshInterval, cfg.RefreshTimeout, cfg.BackOff, refresher)

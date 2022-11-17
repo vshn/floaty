@@ -2,13 +2,11 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -109,24 +107,22 @@ func runNotify(ctx context.Context, cfg notifyConfig) error {
 		flag.Usage()
 		os.Exit(2)
 	}
-	configFile := flag.Arg(0)
-	if strings.ToLower(flag.Arg(1)) != "instance" {
-		return errors.New("Only instance notifications are supported")
-	}
-	vrrpInstanceName := flag.Arg(2)
-	vrrpStatus := flag.Arg(3)
-	if !validVRRPStatus(vrrpStatus) {
-		return fmt.Errorf("Unrecognized VRRP status %q", vrrpStatus)
+
+	notification, err := parseNotification(flag.Args()[1:])
+	if err != nil {
+		flag.Usage()
+		return fmt.Errorf("Failed to parse notification: %w", err)
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"config-file":   configFile,
-		"instance-name": vrrpInstanceName,
-		"status":        vrrpStatus,
+		"config-file":   flag.Arg(0),
+		"instance-name": notification.Instance,
+		"status":        notification.Status,
 		"version":       newVersionInfo().HumanReadable(),
 	}).Info("Hello world")
 
-	unlock, err := acquireLock(ctx, cfg.MakeLockFilePath(vrrpInstanceName), cfg.LockTimeout)
+	// Make sure we stop any earlier scripts by acquiring the lock and killing the old process
+	unlock, err := acquireLock(ctx, cfg.MakeLockFilePath(notification.Instance), cfg.LockTimeout)
 	if err != nil {
 		return fmt.Errorf("Failed to acquire lock: %w", err)
 	}
@@ -140,26 +136,7 @@ func runNotify(ctx context.Context, cfg notifyConfig) error {
 	if err != nil {
 		return err
 	}
-
-	addresses, err := cfg.getAddresses(vrrpInstanceName)
-	if err != nil {
-		return err
-	}
-	logrus.WithField("addresses", addresses).Infof("IP addresses")
-
-	if strings.ToLower(vrrpStatus) == "master" {
-		return pinElasticIPs(ctx, provider, addresses, cfg)
-	}
-	return nil
-}
-
-func validVRRPStatus(status string) bool {
-	switch strings.ToLower(status) {
-	case "master", "fault", "backup":
-		return true
-	default:
-		return false
-	}
+	return handleNotification(ctx, provider, cfg, notification)
 }
 
 func testProvider(ctx context.Context, cfg notifyConfig) error {
