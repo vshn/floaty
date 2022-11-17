@@ -88,6 +88,7 @@ func (h FifoHandler) handleNotifyEvent(ctx context.Context, n Notification) erro
 func defaultNotificatonHandler(provider elasticIPProvider, cfg notifyConfig) notificationHandlerFunc {
 	return func(ctx context.Context, notification Notification) {
 		go func() {
+			logrus.WithField("notification", notification).Infof("Handle Notification")
 			err := handleNotification(ctx, provider, cfg, notification)
 			if err != nil {
 				logrus.Errorf("Failed to handle notification: %s", err)
