@@ -118,7 +118,7 @@ func runFifo(ctx context.Context, cfg notifyConfig) error {
 
 	// Open pipe with O_NONBLOCK to ensure we don't get stuck here and
 	// miss the first write
-	p, err := os.OpenFile(fifoPath, os.O_RDONLY|syscall.O_NONBLOCK, 0601)
+	p, err := os.OpenFile(fifoPath, os.O_RDONLY|syscall.O_NONBLOCK, 0400)
 	if os.IsNotExist(err) {
 		return fmt.Errorf("Named pipe '%s' does not exist", fifoPath)
 	} else if os.IsPermission(err) {
