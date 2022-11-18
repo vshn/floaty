@@ -77,6 +77,40 @@ func (c notifyConfig) NewProvider() (elasticIPProvider, error) {
 	return nil, fmt.Errorf("Provider %q not supported", c.Provider)
 }
 
-func (c *notifyConfig) MakeLockFilePath(name string) string {
+func (c notifyConfig) MakeLockFilePath(name string) string {
 	return fmt.Sprintf(c.LockFileTemplate, url.PathEscape(name))
+}
+
+func (c notifyConfig) getAddresses(vrrpInstanceName string) ([]netAddress, error) {
+	if len(c.ManagedAddresses) > 0 {
+		return c.ManagedAddresses, nil
+	}
+	return readAddressesFromKeepalivedConfig(c.KeepalivedConfigFile, vrrpInstanceName)
+}
+
+func readAddressesFromKeepalivedConfig(path, vrrpInstanceName string) ([]netAddress, error) {
+	parsed, err := parseKeepalivedConfigFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	vrrpInstance, ok := parsed.vrrpInstances[vrrpInstanceName]
+	if !ok {
+		return nil, fmt.Errorf("No VRRP instance named %q", vrrpInstanceName)
+	}
+
+	return vrrpInstance.Addresses, nil
+}
+
+func loadConfig(path string, dryRun bool) (notifyConfig, error) {
+	cfg := newNotifyConfig()
+
+	if err := cfg.ReadFromYAML(path); err != nil {
+		return cfg, err
+	}
+	if dryRun {
+		cfg.Provider = "fake"
+	}
+
+	return cfg, nil
 }
