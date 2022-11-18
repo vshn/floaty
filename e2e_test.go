@@ -109,8 +109,7 @@ func expectUpdate(t *testing.T, buf *bytes.Buffer, addr string, n int) {
 		line, err = buf.ReadString('\n')
 		for errors.Is(err, io.EOF) {
 			line, err = buf.ReadString('\n')
-			if ctx.Err() != nil {
-				assert.NoError(t, ctx.Err())
+			if !assert.NoError(t, ctx.Err()) {
 				return
 			}
 		}
