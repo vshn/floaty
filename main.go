@@ -10,18 +10,21 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/sirupsen/logrus"
 )
 
 var verboseOutput bool
 var jsonLog bool
-var testMode bool
 var dryRun bool
+
+var testMode bool
+var fifoMode bool
 
 const (
 	envNameVerbose string = "FLOATY_LOG_VERBOSE"
 
-	flagUsage = "{ -T <config-path> | <config-path> [group|instance] <vrrp-name> <vrrp-status> <priority> }"
+	flagUsage = "{ -T <config-path> | <config-path> [group|instance] <vrrp-name> <vrrp-status> <priority> | --fifo <config-path> <fifo-path> }"
 )
 
 func init() {
@@ -37,6 +40,8 @@ func init() {
 		flag.BoolVar(&testMode, i, false,
 			"Test mode; verify configuration and API access")
 	}
+
+	flag.BoolVar(&fifoMode, "fifo", false, "Run in fifo mode")
 
 	flag.Usage = func() {
 		version := newVersionInfo().HumanReadable()
@@ -94,12 +99,51 @@ func main() {
 	switch {
 	case testMode:
 		err = testProvider(ctx, cfg)
+	case fifoMode:
+		err = runFifo(ctx, cfg)
 	default:
 		err = runNotify(ctx, cfg)
 	}
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func runFifo(ctx context.Context, cfg notifyConfig) error {
+	if flag.NArg() != 2 {
+		flag.Usage()
+		os.Exit(2)
+	}
+	fifoPath := flag.Arg(1)
+
+	// Open pipe with O_NONBLOCK to ensure we don't get stuck here and
+	// miss the first write
+	p, err := os.OpenFile(fifoPath, os.O_RDONLY|syscall.O_NONBLOCK, 0400)
+	if os.IsNotExist(err) {
+		return fmt.Errorf("Named pipe '%s' does not exist", fifoPath)
+	} else if os.IsPermission(err) {
+		return fmt.Errorf("Insufficient permissions to read named pipe '%s': %w", fifoPath, err)
+	} else if err != nil {
+		return fmt.Errorf("Error while opening named pipe '%s': %w", fifoPath, err)
+	}
+	defer p.Close()
+	logrus.Infof("Opened file %q", fifoPath)
+
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return fmt.Errorf("Failed to watch for changes in fifo: %w", err)
+	}
+	defer watcher.Close()
+	err = watcher.Add(fifoPath)
+	if err != nil {
+		return fmt.Errorf("Failed to watch fifo %q: %w", fifoPath, err)
+	}
+
+	fifoHandler, err := NewFifoHandler(cfg, p, watcher.Events)
+	if err != nil {
+		return fmt.Errorf("Failed to setup FIFO handler: %w", err)
+	}
+	return fifoHandler.HandleFifo(ctx)
 }
 
 func runNotify(ctx context.Context, cfg notifyConfig) error {
