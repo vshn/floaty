@@ -37,38 +37,49 @@ func NewFifoHandler(cfg notifyConfig, pipe io.Reader, events <-chan fsnotify.Eve
 }
 
 func (h FifoHandler) HandleFifo(ctx context.Context) error {
-
+	err := h.handleFifoEvents(ctx)
+	if err != nil {
+		logrus.Errorf("Failed to read from named pipe: %s", err)
+	}
 	for {
 		select {
 		case e := <-h.events:
+			logrus.Debugf("got event: %q", e.Op.String())
 			switch e.Op {
 			case fsnotify.Write:
-				s := bufio.NewScanner(h.pipe)
-				for s.Scan() {
-					line := s.Text()
-					logrus.Infof("Got line: %q", s.Text())
-					n, err := parseNotificationLine(line)
-					if err != nil {
-						logrus.Errorf("Failed to parse fifo event from keepalived, keepalived might be incompatible with the floaty version: %s", err)
-						continue
-					}
-					err = h.handleNotifyEvent(ctx, n)
-					if err != nil {
-						logrus.Errorf("Failed to handle notify event: %s", err)
-						continue
-					}
-					logrus.Infof("handled: %q", s.Text())
+				err := h.handleFifoEvents(ctx)
+				if err != nil {
+					logrus.Errorf("Failed to read from named pipe: %s", err)
 				}
-
 			case fsnotify.Remove, fsnotify.Rename:
 				return fmt.Errorf("Named pipe was removed. Quitting")
 			}
 		case <-ctx.Done():
 			return nil
 		}
-		logrus.Infof("event done")
 	}
 }
+
+func (h FifoHandler) handleFifoEvents(ctx context.Context) error {
+	s := bufio.NewScanner(h.pipe)
+	for s.Scan() {
+		line := s.Text()
+		logrus.Debugf("Got line: %q", s.Text())
+		n, err := parseNotificationLine(line)
+		if err != nil {
+			logrus.Errorf("Failed to parse fifo event from keepalived, keepalived might be incompatible with the floaty version: %s", err)
+			continue
+		}
+		err = h.handleNotifyEvent(ctx, n)
+		if err != nil {
+			logrus.Errorf("Failed to handle notify event: %s", err)
+			continue
+		}
+	}
+	// Only returns non EOF errors
+	return s.Err()
+}
+
 func (h FifoHandler) handleNotifyEvent(ctx context.Context, n Notification) error {
 	stopRunning, ok := h.running[n.Instance]
 	if ok {
