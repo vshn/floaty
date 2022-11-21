@@ -78,6 +78,30 @@ func TestFIFO_interleaving(t *testing.T) {
 	nh.isEventuallyMaster(t, "foo")
 }
 
+func TestFIFO_beforeStart(t *testing.T) {
+	nh := newFakeNotificationHandler()
+	handler, pipe, eventChan := SetupFIFOTest(t, nh.GetHandler(t))
+	ctx, done := context.WithCancel(context.Background())
+	defer done()
+
+	_, err := pipe.Write([]byte("INSTANCE \"foo\" MASTER 100\n"))
+	require.NoError(t, err)
+	_, err = pipe.Write([]byte("INSTANCE \"foo\" FAULT 100\n"))
+	require.NoError(t, err)
+	_, err = pipe.Write([]byte("INSTANCE \"foo\" MASTER 100\n"))
+	require.NoError(t, err)
+	_, err = pipe.Write([]byte("INSTANCE \"bar\" FAULT 100\n"))
+	require.NoError(t, err)
+
+	go func() {
+		assert.NoError(t, handler.HandleFifo(ctx), "Handler should not fail")
+	}()
+	time.Sleep(100 * time.Millisecond)
+	nh.isEventuallyMaster(t, "foo")
+	WriteToPipe(t, pipe, eventChan, "INSTANCE \"foo\" FAULT 100\n")
+	nh.isEventuallyNotMaster(t, "foo")
+}
+
 func SetupFIFOTest(t *testing.T, fn notificationHandlerFunc) (FifoHandler, *bytes.Buffer, chan fsnotify.Event) {
 	var pipe bytes.Buffer
 	eventChan := make(chan fsnotify.Event, 3)
