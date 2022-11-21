@@ -1,8 +1,8 @@
 package main
 
 import (
+	"bufio"
 	"context"
-	"encoding/csv"
 	"fmt"
 	"io"
 
@@ -37,22 +37,17 @@ func NewFifoHandler(cfg notifyConfig, pipe io.Reader, events <-chan fsnotify.Eve
 }
 
 func (h FifoHandler) HandleFifo(ctx context.Context) error {
-	// Yes, this can actually be parsed as a CSV file with spaces as separators and it handles quoted string the same way a shell does.
-	r := csv.NewReader(h.pipe)
-	r.Comma = ' '
 
 	for {
 		select {
 		case e := <-h.events:
 			switch e.Op {
 			case fsnotify.Write:
-				lines, err := r.ReadAll()
-				if err != nil {
-					logrus.Errorf("Failed to read from fifo: %s", err)
-					continue
-				}
-				for _, line := range lines {
-					n, err := parseNotification(line)
+				s := bufio.NewScanner(h.pipe)
+				for s.Scan() {
+					line := s.Text()
+					logrus.Infof("Got line: %q", s.Text())
+					n, err := parseNotificationLine(line)
 					if err != nil {
 						logrus.Errorf("Failed to parse fifo event from keepalived, keepalived might be incompatible with the floaty version: %s", err)
 						continue
@@ -62,6 +57,7 @@ func (h FifoHandler) HandleFifo(ctx context.Context) error {
 						logrus.Errorf("Failed to handle notify event: %s", err)
 						continue
 					}
+					logrus.Infof("handled: %q", s.Text())
 				}
 
 			case fsnotify.Remove, fsnotify.Rename:
@@ -70,6 +66,7 @@ func (h FifoHandler) HandleFifo(ctx context.Context) error {
 		case <-ctx.Done():
 			return nil
 		}
+		logrus.Infof("event done")
 	}
 }
 func (h FifoHandler) handleNotifyEvent(ctx context.Context, n Notification) error {
