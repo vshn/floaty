@@ -143,7 +143,13 @@ func runFifo(ctx context.Context, cfg notifyConfig) error {
 	if err != nil {
 		return fmt.Errorf("Failed to setup FIFO handler: %w", err)
 	}
-	return fifoHandler.HandleFifo(ctx)
+	ctx, done := context.WithCancel(ctx)
+	go func() {
+		err = fifoHandler.HandleFifo(ctx)
+		done()
+	}()
+	<-ctx.Done()
+	return err
 }
 
 func runNotify(ctx context.Context, cfg notifyConfig) error {

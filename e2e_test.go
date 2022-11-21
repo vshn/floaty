@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"syscall"
 	"testing"
 	"time"
 
@@ -63,6 +64,24 @@ func TestE2E_MasterThenFault(t *testing.T) {
 	assert.NoErrorf(t, err, "failed to run fault command:\n%s", string(out))
 
 	assert.NoErrorf(t, done(), "failed to stop master command")
+}
+
+func TestE2E_FIFO(t *testing.T) {
+	conf, cleanup, err := setupConfig(t.Name(), "192.168.1.1/32")
+	require.NoErrorf(t, err, "failed to setup test env")
+	defer cleanup()
+	pname, pipe, removePipe, err := setupFifo(t.Name())
+	require.NoErrorf(t, err, "failed to setup pipe")
+	defer removePipe()
+
+	cmd := exec.Command("./floaty", "--fifo", conf, pname)
+	out, stop, err := startCmd(cmd)
+	require.NoError(t, err)
+	defer stop()
+
+	_, err = pipe.Write([]byte(fmt.Sprintf("INSTANCE %q MASTER 100\n", t.Name())))
+	require.NoError(t, err)
+	expectUpdate(t, out, "192.168.1.1/32", 3)
 }
 
 func startCmd(cmd *exec.Cmd) (*bytes.Buffer, func() error, error) {
@@ -164,4 +183,25 @@ vrrp_instance %s {
 		return "", cleanup, err
 	}
 	return confF, cleanup, nil
+}
+
+func setupFifo(name string) (string, io.Writer, func() error, error) {
+	dir, err := os.MkdirTemp("", name)
+	if err != nil {
+		return "", nil, nil, err
+	}
+	cleanup := func() error {
+		return os.RemoveAll(dir)
+	}
+	pname := filepath.Join(dir, "pipe")
+	err = syscall.Mkfifo(pname, 0666)
+	if err != nil {
+		return "", nil, cleanup, err
+	}
+
+	f, err := os.OpenFile(pname, os.O_RDWR|os.O_CREATE|os.O_APPEND|syscall.O_NONBLOCK, 0777)
+	if err != nil {
+		return "", nil, cleanup, err
+	}
+	return pname, f, cleanup, nil
 }

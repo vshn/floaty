@@ -1,8 +1,8 @@
 package main
 
 import (
+	"bufio"
 	"context"
-	"encoding/csv"
 	"fmt"
 	"io"
 
@@ -37,33 +37,20 @@ func NewFifoHandler(cfg notifyConfig, pipe io.Reader, events <-chan fsnotify.Eve
 }
 
 func (h FifoHandler) HandleFifo(ctx context.Context) error {
-	// Yes, this can actually be parsed as a CSV file with spaces as separators and it handles quoted string the same way a shell does.
-	r := csv.NewReader(h.pipe)
-	r.Comma = ' '
-
+	err := h.handleFifoEvents(ctx)
+	if err != nil {
+		logrus.Errorf("Failed to read from named pipe: %s", err)
+	}
 	for {
 		select {
 		case e := <-h.events:
+			logrus.Debugf("got event: %q", e.Op.String())
 			switch e.Op {
 			case fsnotify.Write:
-				lines, err := r.ReadAll()
+				err := h.handleFifoEvents(ctx)
 				if err != nil {
-					logrus.Errorf("Failed to read from fifo: %s", err)
-					continue
+					logrus.Errorf("Failed to read from named pipe: %s", err)
 				}
-				for _, line := range lines {
-					n, err := parseNotification(line)
-					if err != nil {
-						logrus.Errorf("Failed to parse fifo event from keepalived, keepalived might be incompatible with the floaty version: %s", err)
-						continue
-					}
-					err = h.handleNotifyEvent(ctx, n)
-					if err != nil {
-						logrus.Errorf("Failed to handle notify event: %s", err)
-						continue
-					}
-				}
-
 			case fsnotify.Remove, fsnotify.Rename:
 				return fmt.Errorf("Named pipe was removed. Quitting")
 			}
@@ -72,6 +59,27 @@ func (h FifoHandler) HandleFifo(ctx context.Context) error {
 		}
 	}
 }
+
+func (h FifoHandler) handleFifoEvents(ctx context.Context) error {
+	s := bufio.NewScanner(h.pipe)
+	for s.Scan() {
+		line := s.Text()
+		logrus.Debugf("Got line: %q", s.Text())
+		n, err := parseNotificationLine(line)
+		if err != nil {
+			logrus.Errorf("Failed to parse fifo event from keepalived, keepalived might be incompatible with the floaty version: %s", err)
+			continue
+		}
+		err = h.handleNotifyEvent(ctx, n)
+		if err != nil {
+			logrus.Errorf("Failed to handle notify event: %s", err)
+			continue
+		}
+	}
+	// Only returns non EOF errors
+	return s.Err()
+}
+
 func (h FifoHandler) handleNotifyEvent(ctx context.Context, n Notification) error {
 	stopRunning, ok := h.running[n.Instance]
 	if ok {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"strings"
@@ -22,6 +23,22 @@ const (
 	NotificationFault  NotificationStatus = "FAULT"
 	NotificationBackup NotificationStatus = "BACKUP"
 )
+
+func parseNotificationLine(line string) (Notification, error) {
+	// Yes, this can actually be parsed as a CSV file with spaces as separators and it handles quoted string the same way a shell does.
+	r := csv.NewReader(strings.NewReader(line))
+	r.Comma = ' '
+	notifications, err := r.ReadAll()
+	if err != nil {
+		return Notification{}, err
+	}
+
+	if len(notifications) != 1 {
+		return Notification{}, fmt.Errorf("Failed to parse notification: %q", line)
+	}
+
+	return parseNotification(notifications[0])
+}
 
 func parseNotification(fields []string) (Notification, error) {
 	line := strings.Join(fields, " ")
