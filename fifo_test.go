@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"io"
 	"sync"
 	"testing"
 	"time"
@@ -63,7 +64,7 @@ func TestFIFO_interleaving(t *testing.T) {
 	nh.isEventuallyMaster(t, "foo")
 	nh.isEventuallyNotMaster(t, "bar")
 
-	WriteToPipe(t, pipe, eventChan, "INSTANCE \"foo\" FAULT 100\nINSTANCE \"bar\" FAULT 100\nINSTANCE \"bar\" MASTER 100")
+	WriteToPipe(t, pipe, eventChan, "INSTANCE \"foo\" FAULT 100\nINSTANCE \"bar\" FAULT 100\nINSTANCE \"bar\" MASTER 100\n")
 	nh.isEventuallyNotMaster(t, "foo")
 	nh.isEventuallyMaster(t, "bar")
 
@@ -102,9 +103,71 @@ func TestFIFO_beforeStart(t *testing.T) {
 	nh.isEventuallyNotMaster(t, "foo")
 }
 
-func SetupFIFOTest(t *testing.T, fn notificationHandlerFunc) (FifoHandler, *bytes.Buffer, chan fsnotify.Event) {
-	var pipe bytes.Buffer
-	eventChan := make(chan fsnotify.Event, 3)
+func TestFIFO_withEOF(t *testing.T) {
+	nh := newFakeNotificationHandler()
+	handler, pipe, eventChan := SetupFIFOTest(t, nh.GetHandler(t))
+	ctx, done := context.WithCancel(context.Background())
+	defer done()
+	go func() {
+		assert.NoError(t, handler.HandleFifo(ctx), "Handler should not fail")
+	}()
+	pipe.setSendEOF(true)
+
+	WriteToPipe(t, pipe, eventChan, "INSTANCE \"bar\" MASTER 100\n")
+	nh.isEventuallyMaster(t, "bar")
+
+	WriteToPipe(t, pipe, eventChan, "INSTANCE \"foo\" FAULT 100\nINSTANCE \"bar\" FAULT 100\nINSTANCE \"bar\" MASTER 100\n")
+	nh.isEventuallyMaster(t, "bar")
+
+	WriteToPipe(t, pipe, eventChan, "GROUP \"bar\" BACKUP 100\n")
+	WriteToPipe(t, pipe, eventChan, "G s\"bar\" BACKUP 100\n")
+	nh.isEventuallyMaster(t, "bar")
+
+	WriteToPipe(t, pipe, eventChan, "INSTANCE \"bar\" BACKUP 100\n")
+	nh.isEventuallyNotMaster(t, "bar")
+}
+
+type testBuffer struct {
+	p  bytes.Buffer
+	mu sync.Mutex
+
+	sendEOF bool
+}
+
+func (r *testBuffer) Read(p []byte) (int, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	n, err := r.p.Read(p)
+	for err == io.EOF {
+		if n == 0 {
+			r.mu.Unlock()
+			// We give the writer time to actually write to the buffer
+			time.Sleep(time.Millisecond)
+			r.mu.Lock()
+			n, err = r.p.Read(p)
+		} else {
+			return n, nil
+		}
+	}
+	return n, err
+}
+func (r *testBuffer) Write(p []byte) (int, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.p.Write(p)
+}
+func (r *testBuffer) setSendEOF(sendEOF bool) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.sendEOF = sendEOF
+}
+
+func SetupFIFOTest(t *testing.T, fn notificationHandlerFunc) (FifoHandler, *testBuffer, chan fsnotify.Event) {
+	pipe := testBuffer{
+		mu:      sync.Mutex{},
+		sendEOF: false,
+	}
+	eventChan := make(chan fsnotify.Event, 30)
 
 	handler := FifoHandler{
 		pipe:               &pipe,
@@ -116,7 +179,7 @@ func SetupFIFOTest(t *testing.T, fn notificationHandlerFunc) (FifoHandler, *byte
 	return handler, &pipe, eventChan
 }
 
-func WriteToPipe(t *testing.T, pipe *bytes.Buffer, events chan fsnotify.Event, content string) {
+func WriteToPipe(t *testing.T, pipe io.Writer, events chan fsnotify.Event, content string) {
 	_, err := pipe.Write([]byte(content))
 	require.NoError(t, err, "Failed to write to pipe, test is probably wrong")
 	events <- fsnotify.Event{
@@ -162,7 +225,7 @@ func (h *fakeNotificationHandler) isEventuallyMaster(t *testing.T, instance stri
 		defer h.mu.Unlock()
 		s, ok := h.running[instance]
 		return ok && s.master
-	}, time.Second, 10*time.Millisecond, "%s should be in master state", instance)
+	}, time.Second, 50*time.Millisecond, "%s should be in master state", instance)
 }
 func (h *fakeNotificationHandler) isEventuallyNotMaster(t *testing.T, instance string) {
 	require.Eventuallyf(t, func() bool {
@@ -170,5 +233,5 @@ func (h *fakeNotificationHandler) isEventuallyNotMaster(t *testing.T, instance s
 		defer h.mu.Unlock()
 		s, ok := h.running[instance]
 		return !ok || !s.master
-	}, time.Second, 10*time.Millisecond, "%s should be in master state", instance)
+	}, time.Second, 50*time.Millisecond, "%s should be in master state", instance)
 }
