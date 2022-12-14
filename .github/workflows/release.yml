@@ -47,7 +47,13 @@ jobs:
         outputFile: .github/release-notes.md
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Publish releases
+    - name: Build snapshot for master
+      if: "!startsWith(github.ref, 'refs/tags/v')"
+      uses: goreleaser/goreleaser-action@v4
+      with:
+        args: build --snapshot
+    - name: Build and publish release for tag
+      if: startsWith(github.ref, 'refs/tags/v')
       uses: goreleaser/goreleaser-action@v4
       with:
         args: release --release-notes .github/release-notes.md
