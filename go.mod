@@ -8,7 +8,7 @@ require (
 	github.com/exoscale/egoscale v0.89.0
 	github.com/exoscale/exoip v0.4.3
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/gofrs/uuid v3.4.0+incompatible
+	github.com/gofrs/uuid/v4 v4.4.0+incompatible
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/nightlyone/lockfile v1.0.0
 	github.com/sirupsen/logrus v1.9.0
