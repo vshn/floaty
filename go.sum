@@ -4,6 +4,7 @@ github.com/cenkalti/backoff/v4 v4.1.3 h1:cFAlzYUlVYDysBEH2T5hyJZMh3+5+WCBvSnK6Q8
 github.com/cenkalti/backoff/v4 v4.1.3/go.mod h1:scbssz8iZGpm3xbr14ovlUdkxfGXNInqkPWOWmG2CLw=
 github.com/cloudscale-ch/cloudscale-go-sdk v1.11.0 h1:V13SCwWRuVWaoWb2u9LLdfNZ9/0hTTC+uW8cwvvvHvc=
 github.com/cloudscale-ch/cloudscale-go-sdk v1.11.0/go.mod h1:FhOTOCgKAVvRRMQc1mC0D7xK/3zYnmcZBWFXNkacvMc=
+github.com/cloudscale-ch/cloudscale-go-sdk/v3 v3.0.0/go.mod h1:F83YYSLStbvoOy+ZS11wypQbLRS7bFpWpYfZSE0D+GI=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/cyberdelia/templates v0.0.0-20141128023046-ca7fffd4298c/go.mod h1:GyV+0YP4qX0UQ7r2MoYZ+AvYDp12OF5yg4q8rGnyNh4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
