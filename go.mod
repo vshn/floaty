@@ -7,7 +7,7 @@ require (
 	github.com/cloudscale-ch/cloudscale-go-sdk v1.11.0
 	github.com/exoscale/egoscale v0.89.0
 	github.com/exoscale/exoip v0.4.3
-	github.com/fsnotify/fsnotify v1.6.0
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/nightlyone/lockfile v1.0.0
