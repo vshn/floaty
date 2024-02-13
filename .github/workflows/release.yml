@@ -52,7 +52,7 @@ jobs:
       run:
         touch .snapshot
     - name: Publish releases
-      uses: goreleaser/goreleaser-action@v4
+      uses: goreleaser/goreleaser-action@v5
       with:
         args: release --auto-snapshot --release-notes .github/release-notes.md
       env:
