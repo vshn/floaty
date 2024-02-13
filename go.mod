@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/cloudscale-ch/cloudscale-go-sdk/v4 v4.0.0
-	github.com/exoscale/egoscale v0.89.0
+	github.com/exoscale/egoscale v0.102.3
 	github.com/exoscale/exoip v0.4.3
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gofrs/uuid v4.4.0+incompatible
@@ -19,6 +19,8 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deepmap/oapi-codegen v1.9.1 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/vishvananda/netlink v1.1.0 // indirect
