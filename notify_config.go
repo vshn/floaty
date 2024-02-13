@@ -3,11 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/url"
+	"os"
 	"time"
 
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 const (
@@ -51,12 +51,17 @@ func newNotifyConfig() notifyConfig {
 
 // Update configuration from a YAML file
 func (c *notifyConfig) ReadFromYAML(path string) error {
-	content, err := ioutil.ReadFile(path)
+	configreader, err := os.Open(path)
 	if err != nil {
 		return err
 	}
 
-	return yaml.UnmarshalStrict(content, c)
+	decoder := yaml.NewDecoder(configreader)
+	// NOTE(sg): With gopkg.in/yaml.v3, we use the decoder API instead of
+	// `Unmarshal` so we can ensure that we get errors for unknown fields.
+	decoder.KnownFields(true)
+
+	return decoder.Decode(c)
 }
 
 func (c notifyConfig) NewProvider() (elasticIPProvider, error) {
