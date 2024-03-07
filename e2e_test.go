@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
 	"syscall"
 	"testing"
 	"time"
@@ -84,8 +85,8 @@ func TestE2E_FIFO(t *testing.T) {
 	expectUpdate(t, out, "192.168.1.1/32", 3)
 }
 
-func startCmd(cmd *exec.Cmd) (*bytes.Buffer, func() error, error) {
-	out := &bytes.Buffer{}
+func startCmd(cmd *exec.Cmd) (*syncBuffer, func() error, error) {
+	out := &syncBuffer{}
 	cmd.Stdout = out
 	err := cmd.Start()
 	if err != nil {
@@ -94,9 +95,9 @@ func startCmd(cmd *exec.Cmd) (*bytes.Buffer, func() error, error) {
 	return out, cmd.Process.Kill, nil
 }
 
-func runCmd(cmd *exec.Cmd) (*bytes.Buffer, func() error, error) {
+func runCmd(cmd *exec.Cmd) (*syncBuffer, func() error, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	out := &bytes.Buffer{}
+	out := &syncBuffer{}
 	cmd.Stdout = out
 	doneC := make(chan error, 1)
 	go func() {
@@ -118,7 +119,7 @@ func runCmd(cmd *exec.Cmd) (*bytes.Buffer, func() error, error) {
 	return out, done, nil
 }
 
-func expectUpdate(t *testing.T, buf *bytes.Buffer, addr string, n int) {
+func expectUpdate(t *testing.T, buf *syncBuffer, addr string, n int) {
 	ctx, done := context.WithTimeout(context.TODO(), 8*time.Second)
 	defer done()
 	count := 0
@@ -204,4 +205,27 @@ func setupFifo(name string) (string, io.Writer, func() error, error) {
 		return "", nil, cleanup, err
 	}
 	return pname, f, cleanup, nil
+}
+
+type syncBuffer struct {
+	sync.Mutex
+	b bytes.Buffer
+}
+
+func (sb *syncBuffer) Write(p []byte) (n int, err error) {
+	sb.Lock()
+	defer sb.Unlock()
+	return sb.b.Write(p)
+}
+
+func (sb *syncBuffer) Read(p []byte) (n int, err error) {
+	sb.Lock()
+	defer sb.Unlock()
+	return sb.b.Read(p)
+}
+
+func (sb *syncBuffer) ReadString(delim byte) (string, error) {
+	sb.Lock()
+	defer sb.Unlock()
+	return sb.b.ReadString(delim)
 }
