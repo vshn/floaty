@@ -1,27 +1,22 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"errors"
 	"fmt"
-	"net/url"
-	"sync"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
-	"github.com/exoscale/egoscale"
+	egoscale "github.com/exoscale/egoscale/v2"
 	"github.com/exoscale/exoip"
-	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
+	"go.uber.org/multierr"
 )
 
 const (
 	defaultExoscaleEndpoint = "https://api.exoscale.ch/compute"
 )
 
-func findExoscaleInstanceID() (uuid.UUID, error) {
-	var instanceID uuid.UUID
+func findExoscaleZone() (string, error) {
+	var zone string
 
 	fn := func() error {
 		mserver, err := exoip.FindMetadataServer()
@@ -31,43 +26,51 @@ func findExoscaleInstanceID() (uuid.UUID, error) {
 
 		logrus.Debugf("Metadata server %q", mserver)
 
-		rawInstanceID, err := exoip.FetchMetadata(mserver, "/latest/instance-id")
-
-		if err == nil && len(rawInstanceID) < 1 {
-			return errors.New("Received empty instance ID")
-		}
-
-		instanceID, err = uuid.FromString(rawInstanceID)
+		zone, err = exoip.FetchMetadata(mserver, "/latest/availability-zone")
 
 		return err
 	}
 
 	if err := metadataRetry(fn); err != nil {
-		return uuid.Nil, err
+		return "", err
+	}
+
+	return zone, nil
+}
+
+func findExoscaleInstanceID() (string, error) {
+	var instanceID string
+
+	fn := func() error {
+		mserver, err := exoip.FindMetadataServer()
+		if err != nil {
+			return err
+		}
+
+		logrus.Debugf("Metadata server %q", mserver)
+
+		instanceID, err = exoip.FetchMetadata(mserver, "/latest/instance-id")
+
+		return err
+	}
+
+	if err := metadataRetry(fn); err != nil {
+		return "", err
 	}
 
 	return instanceID, nil
 }
 
 type exoscaleNotifyConfig struct {
-	Endpoint   *textURL  `yaml:"endpoint"`
-	Key        string    `yaml:"key"`
-	Secret     string    `yaml:"secret"`
-	InstanceID uuid.UUID `yaml:"instance-id"`
+	Endpoint   *textURL `yaml:"endpoint"`
+	Zone       string   `yaml:"zone"`
+	Key        string   `yaml:"key"`
+	Secret     string   `yaml:"secret"`
+	InstanceID string   `yaml:"instance-id"`
 }
 
 func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
-	var endpoint *url.URL
 	var err error
-
-	if c.Endpoint == nil {
-		endpoint, err = url.Parse(defaultExoscaleEndpoint)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		endpoint = &c.Endpoint.URL
-	}
 
 	if len(c.Key) < 1 {
 		return nil, fmt.Errorf("Authentication key required")
@@ -77,9 +80,17 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 		return nil, fmt.Errorf("Authentication secret required")
 	}
 
+	zone := c.Zone
+	if zone == "" {
+		if zone, err = findExoscaleZone(); err != nil {
+			return nil, fmt.Errorf("Exoscale zone lookup: %s", err)
+		}
+	}
+	logrus.WithField("zone", zone).Debug("Exoscale zone")
+
 	instanceID := c.InstanceID
 
-	if bytes.Equal(c.InstanceID.Bytes(), uuid.Nil.Bytes()) {
+	if c.InstanceID == "" {
 		if instanceID, err = findExoscaleInstanceID(); err != nil {
 			return nil, fmt.Errorf("Instance ID lookup: %s", err)
 		}
@@ -87,70 +98,86 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 
 	logrus.WithField("instance-id", instanceID).Debug("Instance ID")
 
-	client := egoscale.NewClient(endpoint.String(), c.Key, c.Secret)
-
-	// The timeout is only used when no context is given to API invocations
-	client.Timeout = 1 * time.Minute
-
-	resp, err := client.Get(
-		egoscale.VirtualMachine{
-			ID: &egoscale.UUID{
-				UUID: instanceID,
-			},
-		})
+	timeoutOpt := egoscale.ClientOptWithTimeout(1 * time.Minute)
+	client, err := egoscale.NewClient(c.Key, c.Secret, timeoutOpt)
 	if err != nil {
 		return nil, err
 	}
 
-	vm := resp.(*egoscale.VirtualMachine)
-
-	nic := vm.DefaultNic()
-	if nic == nil {
-		return nil, fmt.Errorf("Default VM NIC not found")
+	vm, err := client.GetInstance(context.Background(), zone, instanceID)
+	if err != nil {
+		return nil, err
 	}
 
 	return &exoscaleElasticIPProvider{
-		client:     client,
-		instanceID: vm.ID,
-		nicID:      nic.ID,
+		client:   client,
+		zone:     zone,
+		instance: vm,
 	}, nil
 }
 
 type exoscaleElasticIPProvider struct {
-	client     *egoscale.Client
-	instanceID *egoscale.UUID
-	nicID      *egoscale.UUID
+	client   *egoscale.Client
+	zone     string
+	instance *egoscale.Instance
 }
 
 func (p *exoscaleElasticIPProvider) Test(ctx context.Context) error {
-	nic, err := p.client.ListWithContext(ctx, &egoscale.Nic{
-		VirtualMachineID: p.instanceID,
-		ID:               p.nicID,
-	})
+	// Check that we can list EIPs and instances
+	eips, err := p.client.ListElasticIPs(ctx, p.zone)
 	if err != nil {
-		return fmt.Errorf("Retrieving NIC %q: %s", p.nicID, err)
+		return err
 	}
 
-	logrus.WithField("nic", nic).Info("Test successful")
+	elasticIPs := []string{}
+	for _, eip := range eips {
+		elasticIPs = append(elasticIPs, eip.IPAddress.String())
+	}
+	logrus.WithField("eips", elasticIPs).Debug("Got elastic IPs")
+
+	vms, err := p.client.ListInstances(ctx, p.zone)
+	if err != nil {
+		return err
+	}
+
+	instances := []string{}
+	for _, vm := range vms {
+		instances = append(instances, *vm.ID)
+	}
+	logrus.WithField("instances", instances).Debug("Got instances")
 
 	return nil
 }
 
 func (p *exoscaleElasticIPProvider) NewElasticIPRefresher(logger *logrus.Entry,
 	network netAddress) (elasticIPRefresher, error) {
-	return &exoscaleElasticIPRefresher{
-		logger:  logger,
-		network: network,
-		client:  p.client,
-		nicID:   p.nicID,
-	}, nil
+	eips, err := p.client.ListElasticIPs(context.Background(), p.zone)
+	if err != nil {
+		return nil, fmt.Errorf("Elastic IP lookup: %s", err)
+	}
+	for _, eip := range eips {
+		logrus.WithField("eip", eip.IPAddress).Debug("Checking EIP")
+		if network.Contains(*eip.IPAddress) {
+			return &exoscaleElasticIPRefresher{
+				logger:   logger,
+				network:  network,
+				client:   p.client,
+				eip:      eip,
+				instance: p.instance,
+				zone:     p.zone,
+			}, nil
+		}
+	}
+	return nil, fmt.Errorf("Unable to find elastic IP for %s", network)
 }
 
 type exoscaleElasticIPRefresher struct {
-	network netAddress
-	logger  *logrus.Entry
-	client  *egoscale.Client
-	nicID   *egoscale.UUID
+	network  netAddress
+	logger   *logrus.Entry
+	client   *egoscale.Client
+	eip      *egoscale.ElasticIP
+	instance *egoscale.Instance
+	zone     string
 }
 
 func (r *exoscaleElasticIPRefresher) String() string {
@@ -162,115 +189,44 @@ func (r *exoscaleElasticIPRefresher) Logger() *logrus.Entry {
 }
 
 func (r *exoscaleElasticIPRefresher) Refresh(ctx context.Context) error {
-	// Find virtual machines with IP address
-	vms, err := r.client.ListWithContext(ctx, &egoscale.VirtualMachine{
-		Nic: []egoscale.Nic{
-			egoscale.Nic{
-				IsDefault: true,
-				IPAddress: r.network.IP,
-			},
-		},
-	})
+	err := r.client.AttachInstanceToElasticIP(ctx, r.zone, r.instance, r.eip)
 	if err != nil {
-		return err
+		return fmt.Errorf("while attaching the IP to this instance: %s", err)
+	}
+	logrus.Infof("Ensured that %s is attached to instance %s", r.eip.IPAddress, *r.instance.ID)
+
+	vms, err := r.client.ListInstances(ctx, r.zone)
+	if err != nil {
+		return fmt.Errorf("Unable to list instances: %s", err)
 	}
 
-	commands := []egoscale.Command{
-		// Always force association to target machine
-		&egoscale.AddIPToNic{
-			NicID:     r.nicID,
-			IPAddress: r.network.IP,
-		},
-	}
-
-	// Determine which other virtual machines have the IP address associated
-	// and prepare commands to disassociate
-	for _, i := range vms {
-		vm := i.(*egoscale.VirtualMachine)
-		nic := vm.DefaultNic()
-
-		r.logger.WithFields(logrus.Fields{
-			"vm-id":   vm.ID,
-			"vm-name": vm.Name,
-			"vm-nic":  nic,
-		}).Debugf("Virtual machine %q", vm.Name)
-
-		if nic.ID != nil && r.nicID.Equal(*nic.ID) {
-			// Desired target
+	// Detach from other instances
+	var detacherrs error
+	for _, vm := range vms {
+		if *vm.ID == *r.instance.ID {
 			continue
 		}
-
-		for _, secondary := range nic.SecondaryIP {
-			if secondary.IPAddress.Equal(r.network.IP) {
-				commands = append(commands, &egoscale.RemoveIPFromNic{
-					ID: secondary.ID,
-				})
+		// NOTE(sg): the response from `ListInstances()` doesn't
+		// contain the attached EIPs. Because of that we need to fetch
+		// the instance details with `GetInstance()` in order to be
+		// able to detach EIPs from other instances.
+		vmdetails, err := r.client.GetInstance(ctx, r.zone, *vm.ID)
+		if err != nil {
+			detacherrs = multierr.Append(detacherrs, err)
+			continue
+		}
+		if vmdetails.ElasticIPIDs != nil {
+			logrus.Debugf("Checking if we need to detach EIPs from %s", *vm.ID)
+			for _, eip := range *vmdetails.ElasticIPIDs {
+				if eip == *r.eip.ID {
+					logrus.Infof("Detaching EIP %s from %s", r.eip.IPAddress, *vm.ID)
+					err := r.client.DetachInstanceFromElasticIP(ctx, r.zone, vm, r.eip)
+					if err != nil {
+						detacherrs = multierr.Append(detacherrs, err)
+					}
+				}
 			}
 		}
 	}
-
-	return r.runCommands(ctx, commands)
-}
-
-// Run any number of Exoscale API commands in parallel
-func (r *exoscaleElasticIPRefresher) runCommands(ctx context.Context, commands []egoscale.Command) error {
-	mu := sync.Mutex{}
-	wg := sync.WaitGroup{}
-
-	var errors []error
-
-	for _, i := range commands {
-		wg.Add(1)
-
-		go func(cmd egoscale.Command) {
-			defer wg.Done()
-
-			logger := r.logger.WithFields(logrus.Fields{
-				"command":   r.client.APIName(cmd),
-				"arguments": cmd,
-			})
-
-			response, err := r.client.RequestWithContext(ctx, cmd)
-			if err == nil {
-				logger.WithField("response", response).Info("Command successful")
-				return
-			}
-
-			logger.Error(err)
-
-			mu.Lock()
-			defer mu.Unlock()
-
-			errors = append(errors, err)
-		}(i)
-	}
-
-	wg.Wait()
-
-	if len(errors) == 0 {
-		return nil
-	}
-
-	clientErrorOnly := true
-
-	for _, err := range errors {
-		if apiError, ok := err.(*egoscale.ErrorResponse); ok {
-			clientErrorOnly = clientErrorOnly && (apiError.ErrorCode >= 400 && apiError.ErrorCode < 500)
-		} else {
-			clientErrorOnly = false
-		}
-
-		if !clientErrorOnly {
-			break
-		}
-	}
-
-	// Not including error details as they've been logged before
-	err := fmt.Errorf("%d of %d commands failed", len(errors), len(commands))
-
-	if clientErrorOnly {
-		return backoff.Permanent(err)
-	}
-
-	return err
+	return detacherrs
 }
