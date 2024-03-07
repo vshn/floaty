@@ -1,6 +1,8 @@
 module github.com/vshn/floaty
 
-go 1.19
+go 1.22
+
+toolchain go1.22.1
 
 require (
 	github.com/cenkalti/backoff/v4 v4.2.1
