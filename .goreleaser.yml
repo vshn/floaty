@@ -43,6 +43,11 @@ nfpms:
       - deb
       - rpm
       - apk
+    contents:
+      - src: floaty-self-test.sh
+        dst: /usr/lib/nagios/plugins/floaty-self-test
+        file_info:
+          mode: 0755
 
 release:
   prerelease: auto
