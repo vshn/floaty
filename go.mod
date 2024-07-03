@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	github.com/cenkalti/backoff/v4 v4.2.1
+	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cloudscale-ch/cloudscale-go-sdk/v5 v5.0.0
 	github.com/exoscale/egoscale v0.102.3
 	github.com/exoscale/exoip v0.4.3
