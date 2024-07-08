@@ -85,9 +85,11 @@ func main() {
 
 	setupLogger()
 
-	WaitForKeepalivedTermination(ctx, stop)
-	if err = configOutOfMemoryKiller(); err != nil {
-		log.Fatal(err)
+	if !testMode {
+		WaitForKeepalivedTermination(ctx, stop)
+		if err = configOutOfMemoryKiller(); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	configFile := flag.Arg(0)
