@@ -7,7 +7,7 @@ toolchain go1.22.5
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cloudscale-ch/cloudscale-go-sdk/v5 v5.0.0
-	github.com/exoscale/egoscale v0.102.3
+	github.com/exoscale/egoscale v0.102.4
 	github.com/exoscale/exoip v0.4.3
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gofrs/uuid v4.4.0+incompatible
@@ -32,7 +32,7 @@ require (
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deepmap/oapi-codegen v1.16.3 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
@@ -71,7 +71,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
