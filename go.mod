@@ -6,7 +6,7 @@ toolchain go1.22.5
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/cloudscale-ch/cloudscale-go-sdk/v5 v5.0.0
+	github.com/cloudscale-ch/cloudscale-go-sdk/v5 v5.1.0
 	github.com/exoscale/egoscale v0.102.3
 	github.com/exoscale/exoip v0.4.3
 	github.com/fsnotify/fsnotify v1.7.0
