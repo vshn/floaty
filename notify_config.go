@@ -18,7 +18,7 @@ const (
 	defaultKeepalivedConfigFile = "/etc/keepalived/keepalived.conf"
 
 	defaultRefreshInterval = 1 * time.Minute
-	defaultRefreshTimeout  = 10 * time.Second
+	defaultRefreshTimeout  = 15 * time.Second
 )
 
 type notifyConfig struct {
