@@ -103,7 +103,7 @@ func (c exoscaleNotifyConfig) NewProvider(ctx context.Context) (elasticIPProvide
 	}
 	client = client.WithEndpoint(zoneEndpoint)
 
-	vm, err := client.GetInstance(context.Background(), instanceID)
+	vm, err := client.GetInstance(ctx, instanceID)
 	if err != nil {
 		return nil, err
 	}
@@ -148,9 +148,10 @@ func (p *exoscaleElasticIPProvider) Test(ctx context.Context) error {
 	return nil
 }
 
-func (p *exoscaleElasticIPProvider) NewElasticIPRefresher(logger *logrus.Entry,
-	network netAddress) (elasticIPRefresher, error) {
-	eips, err := p.client.ListElasticIPS(context.Background())
+func (p *exoscaleElasticIPProvider) NewElasticIPRefresher(ctx context.Context,
+	logger *logrus.Entry, network netAddress) (elasticIPRefresher, error) {
+
+	eips, err := p.client.ListElasticIPS(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("Elastic IP lookup: %s", err)
 	}

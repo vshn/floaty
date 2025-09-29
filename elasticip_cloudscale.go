@@ -151,8 +151,9 @@ func (p *cloudscaleFloatingIPProvider) Test(ctx context.Context) error {
 	return errors.New("Self-test failed")
 }
 
-func (p *cloudscaleFloatingIPProvider) NewElasticIPRefresher(logger *logrus.Entry,
-	network netAddress) (elasticIPRefresher, error) {
+func (p *cloudscaleFloatingIPProvider) NewElasticIPRefresher(ctx context.Context,
+	logger *logrus.Entry, network netAddress) (elasticIPRefresher, error) {
+
 	return &cloudscaleFloatingIPRefresher{
 		provider: p,
 		network:  network,

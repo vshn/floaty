@@ -21,8 +21,8 @@ func (p *fakeElasticIPProvider) Test(ctx context.Context) error {
 	return nil
 }
 
-func (p *fakeElasticIPProvider) NewElasticIPRefresher(logger *logrus.Entry,
-	network netAddress) (elasticIPRefresher, error) {
+func (p *fakeElasticIPProvider) NewElasticIPRefresher(ctx context.Context,
+	logger *logrus.Entry, network netAddress) (elasticIPRefresher, error) {
 
 	p.mu.Lock()
 	defer p.mu.Unlock()
