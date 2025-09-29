@@ -53,7 +53,7 @@ type exoscaleNotifyConfig struct {
 	InstanceID string   `yaml:"instance-id"`
 }
 
-func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
+func (c exoscaleNotifyConfig) NewProvider(ctx context.Context) (elasticIPProvider, error) {
 	var err error
 
 	if len(c.Key) < 1 {
@@ -66,7 +66,7 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 
 	zone := c.Zone
 	if zone == "" {
-		if zone, err = findExoscaleZone(context.Background()); err != nil {
+		if zone, err = findExoscaleZone(ctx); err != nil {
 			return nil, fmt.Errorf("Exoscale zone lookup: %s", err)
 		}
 	}
@@ -74,7 +74,7 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 
 	var instanceID egoscale.UUID
 	if c.InstanceID == "" {
-		if instanceID, err = findExoscaleInstanceID(context.Background()); err != nil {
+		if instanceID, err = findExoscaleInstanceID(ctx); err != nil {
 			return nil, fmt.Errorf("Instance ID lookup: %s", err)
 		}
 	} else {
