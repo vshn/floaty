@@ -8,24 +8,17 @@ import (
 
 	egoscale "github.com/exoscale/egoscale/v3"
 	"github.com/exoscale/egoscale/v3/credentials"
-	"github.com/exoscale/exoip"
+	"github.com/exoscale/egoscale/v3/metadata"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/multierr"
 )
 
-func findExoscaleZone() (string, error) {
+func findExoscaleZone(ctx context.Context) (string, error) {
 	var zone string
 
 	fn := func() error {
-		mserver, err := exoip.FindMetadataServer()
-		if err != nil {
-			return err
-		}
-
-		logrus.Debugf("Metadata server %q", mserver)
-
-		zone, err = exoip.FetchMetadata(mserver, "/latest/availability-zone")
-
+		var err error
+		zone, err = metadata.Get(ctx, "availability-zone")
 		return err
 	}
 
@@ -36,19 +29,12 @@ func findExoscaleZone() (string, error) {
 	return zone, nil
 }
 
-func findExoscaleInstanceID() (egoscale.UUID, error) {
+func findExoscaleInstanceID(ctx context.Context) (egoscale.UUID, error) {
 	var instanceID string
 
 	fn := func() error {
-		mserver, err := exoip.FindMetadataServer()
-		if err != nil {
-			return err
-		}
-
-		logrus.Debugf("Metadata server %q", mserver)
-
-		instanceID, err = exoip.FetchMetadata(mserver, "/latest/instance-id")
-
+		var err error
+		instanceID, err = metadata.Get(ctx, "instance-id")
 		return err
 	}
 
@@ -80,7 +66,7 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 
 	zone := c.Zone
 	if zone == "" {
-		if zone, err = findExoscaleZone(); err != nil {
+		if zone, err = findExoscaleZone(context.Background()); err != nil {
 			return nil, fmt.Errorf("Exoscale zone lookup: %s", err)
 		}
 	}
@@ -88,7 +74,7 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 
 	var instanceID egoscale.UUID
 	if c.InstanceID == "" {
-		if instanceID, err = findExoscaleInstanceID(); err != nil {
+		if instanceID, err = findExoscaleInstanceID(context.Background()); err != nil {
 			return nil, fmt.Errorf("Instance ID lookup: %s", err)
 		}
 	} else {
