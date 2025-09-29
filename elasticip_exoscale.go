@@ -13,10 +13,6 @@ import (
 	"go.uber.org/multierr"
 )
 
-const (
-	defaultExoscaleEndpoint = "https://api.exoscale.ch/compute"
-)
-
 func findExoscaleZone() (string, error) {
 	var zone string
 
@@ -115,6 +111,10 @@ func (c exoscaleNotifyConfig) NewProvider() (elasticIPProvider, error) {
 	// from the zone name without listing all zones on the API, so we
 	// build the URL ourselves here.
 	zoneEndpoint := egoscale.Endpoint(fmt.Sprintf("https://api-%s.exoscale.com/v2", zone))
+	if c.Endpoint != nil {
+		logrus.WithField("endpoint", c.Endpoint.String()).Info("Using custom API endpoint")
+		zoneEndpoint = egoscale.Endpoint(c.Endpoint.String())
+	}
 	client = client.WithEndpoint(zoneEndpoint)
 
 	vm, err := client.GetInstance(context.Background(), instanceID)
