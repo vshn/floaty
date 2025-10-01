@@ -1,5 +1,5 @@
 # The main binary is statically linked, but it requires access to the TLS root certificates to verify connections.
-FROM docker.io/library/alpine:3.20
+FROM docker.io/library/alpine:3.22
 
 ENTRYPOINT ["/usr/bin/floaty"]
 
