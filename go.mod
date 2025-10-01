@@ -7,6 +7,7 @@ toolchain go1.25.1
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cloudscale-ch/cloudscale-go-sdk/v5 v5.1.0
+	github.com/cloudscale-ch/cloudscale-go-sdk/v6 v6.0.0
 	github.com/exoscale/egoscale/v3 v3.1.26
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gofrs/uuid v4.4.0+incompatible
