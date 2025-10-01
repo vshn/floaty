@@ -6,6 +6,7 @@ toolchain go1.25.1
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
+	github.com/cenkalti/backoff/v5 v5.0.3
 	github.com/cloudscale-ch/cloudscale-go-sdk/v6 v6.0.0
 	github.com/exoscale/egoscale/v3 v3.1.26
 	github.com/fsnotify/fsnotify v1.9.0
@@ -19,7 +20,6 @@ require (
 )
 
 require (
-	github.com/cenkalti/backoff/v5 v5.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/diskfs/go-diskfs v1.4.0 // indirect
 	github.com/elliotwutingfeng/asciiset v0.0.0-20230602022725-51bbb787efab // indirect
