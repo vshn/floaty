@@ -141,7 +141,7 @@ func runFifo(ctx context.Context, cfg notifyConfig) error {
 		return fmt.Errorf("Failed to watch fifo %q: %w", fifoPath, err)
 	}
 
-	fifoHandler, err := NewFifoHandler(cfg, p, watcher.Events)
+	fifoHandler, err := NewFifoHandler(ctx, cfg, p, watcher.Events)
 	if err != nil {
 		return fmt.Errorf("Failed to setup FIFO handler: %w", err)
 	}
@@ -184,7 +184,7 @@ func runNotify(ctx context.Context, cfg notifyConfig) error {
 		}
 	}()
 
-	provider, err := cfg.NewProvider()
+	provider, err := cfg.NewProvider(ctx)
 	if err != nil {
 		return err
 	}
@@ -198,7 +198,7 @@ func testProvider(ctx context.Context, cfg notifyConfig) error {
 		os.Exit(2)
 	}
 
-	provider, err := cfg.NewProvider()
+	provider, err := cfg.NewProvider(ctx)
 	if err != nil {
 		return err
 	}

@@ -61,8 +61,8 @@ Configuration data must be supplied as a YAML file. The top level is a map.
   automatically added to avoid the thundering herd problem.
 
 * `refresh-timeout`: How long refreshing an individual address may take at most
-  as a duration. Defaults to 10 seconds. Refreshes are parallelized and do not
-  wait for each other.
+  as a duration. Defaults to 10 seconds in general, and to 15 seconds for
+  Exoscale. Refreshes are parallelized and do not wait for each other.
 
 * `back-off`: A map configuring the back-off behaviour for retries of failing
   address refreshes. Jitter is automatically added to avoid the thundering herd

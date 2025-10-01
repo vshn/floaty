@@ -10,7 +10,7 @@ import (
 
 type elasticIPProvider interface {
 	Test(context.Context) error
-	NewElasticIPRefresher(*logrus.Entry, netAddress) (elasticIPRefresher, error)
+	NewElasticIPRefresher(context.Context, *logrus.Entry, netAddress) (elasticIPRefresher, error)
 }
 
 type elasticIPRefresher interface {
@@ -22,7 +22,7 @@ func pinElasticIPs(ctx context.Context, provider elasticIPProvider, addresses []
 	refreshers := []elasticIPRefresher{}
 	for _, address := range addresses {
 		logger := logrus.WithField("address", address)
-		refresher, err := provider.NewElasticIPRefresher(logger, address)
+		refresher, err := provider.NewElasticIPRefresher(ctx, logger, address)
 		if err != nil {
 			return err
 		}

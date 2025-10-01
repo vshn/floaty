@@ -21,9 +21,9 @@ type FifoHandler struct {
 
 type notificationHandlerFunc func(ctx context.Context, notification Notification)
 
-func NewFifoHandler(cfg notifyConfig, pipe io.Reader, events <-chan fsnotify.Event) (*FifoHandler, error) {
+func NewFifoHandler(ctx context.Context, cfg notifyConfig, pipe io.Reader, events <-chan fsnotify.Event) (*FifoHandler, error) {
 
-	p, err := cfg.NewProvider()
+	p, err := cfg.NewProvider(ctx)
 	if err != nil {
 		return nil, err
 	}

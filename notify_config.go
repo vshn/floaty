@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -17,7 +18,7 @@ const (
 	defaultKeepalivedConfigFile = "/etc/keepalived/keepalived.conf"
 
 	defaultRefreshInterval = 1 * time.Minute
-	defaultRefreshTimeout  = 10 * time.Second
+	defaultRefreshTimeout  = 15 * time.Second
 )
 
 type notifyConfig struct {
@@ -64,7 +65,7 @@ func (c *notifyConfig) ReadFromYAML(path string) error {
 	return decoder.Decode(c)
 }
 
-func (c notifyConfig) NewProvider() (elasticIPProvider, error) {
+func (c notifyConfig) NewProvider(ctx context.Context) (elasticIPProvider, error) {
 	switch c.Provider {
 	case "":
 		return nil, errors.New("Missing provider")
@@ -73,7 +74,7 @@ func (c notifyConfig) NewProvider() (elasticIPProvider, error) {
 		return c.Cloudscale.NewProvider()
 
 	case "exoscale":
-		return c.Exoscale.NewProvider()
+		return c.Exoscale.NewProvider(ctx)
 
 	case "fake":
 		return NewFakeProvider()
