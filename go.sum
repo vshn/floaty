@@ -10,8 +10,8 @@ github.com/diskfs/go-diskfs v1.4.0 h1:MAybY6TPD+fmhY+a2qFhmdvMeIKvCqlgh4QIc1uCmB
 github.com/diskfs/go-diskfs v1.4.0/go.mod h1:G8cyy+ngM+3yKlqjweMmtqvE+TxsnIo1xumbJX1AeLg=
 github.com/elliotwutingfeng/asciiset v0.0.0-20230602022725-51bbb787efab h1:h1UgjJdAAhj+uPL68n7XASS6bU+07ZX1WJvVS2eyoeY=
 github.com/elliotwutingfeng/asciiset v0.0.0-20230602022725-51bbb787efab/go.mod h1:GLo/8fDswSAniFG+BFIaiSPcK610jyzgEhWYPQwuQdw=
-github.com/exoscale/egoscale/v3 v3.1.26 h1:bXXT0zVLbE4QFm6tmt0bg6ZPk9pQgUA3Z8SJrctQ7b0=
-github.com/exoscale/egoscale/v3 v3.1.26/go.mod h1:0iY8OxgHJCS5TKqDNhwOW95JBKCnBZl3YGU4Yt+NqkU=
+github.com/exoscale/egoscale/v3 v3.1.27 h1:vKdWZG8QFDc7rY7lCfcuudO+ovyp5psYjFwKVqmkhCE=
+github.com/exoscale/egoscale/v3 v3.1.27/go.mod h1:0iY8OxgHJCS5TKqDNhwOW95JBKCnBZl3YGU4Yt+NqkU=
 github.com/fatih/color v1.16.0 h1:zmkK9Ngbjj+K0yRhTVONQh1p/HknKYSlNT+vZCzyokM=
 github.com/fatih/color v1.16.0/go.mod h1:fL2Sau1YI5c0pdGEVCbKQbLXB6edEj1ZgiY4NijnWvE=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
