@@ -1,13 +1,13 @@
 module github.com/vshn/floaty
 
-go 1.24.0
+go 1.25
 
 toolchain go1.25.1
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cloudscale-ch/cloudscale-go-sdk/v6 v6.0.0
-	github.com/exoscale/egoscale/v3 v3.1.26
+	github.com/exoscale/egoscale/v3 v3.1.48
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/mitchellh/go-ps v1.0.0
@@ -45,9 +45,9 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/ulikunitz/xz v0.5.14 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.42.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/text v0.29.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b // indirect
 	gopkg.in/djherbis/times.v1 v1.3.0 // indirect
 )
